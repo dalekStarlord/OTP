@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { usePlanStore } from '../store/planStore';
@@ -28,12 +28,36 @@ const toIcon = L.divIcon({
   iconAnchor: [11, 11],
 });
 
+const userIcon = L.divIcon({
+  className: 'custom-marker',
+  html: '<div style="background-color: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 4px solid white; box-shadow: 0 2px 8px rgba(59,130,246,0.5); position: relative;"><div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background-color: white; border-radius: 50%;"></div></div>',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+});
+
 type MapViewProps = {
   hoveredItineraryId: string | null;
 };
 
 export default function MapView({ hoveredItineraryId }: MapViewProps) {
-  const { from, to, itineraries, selectedItineraryId } = usePlanStore();
+  const { from, to, itineraries, selectedItineraryId, navigation } = usePlanStore();
+
+  // Calculate user position based on navigation state
+  const userPosition = React.useMemo(() => {
+    if (!navigation.isNavigating || !selectedItineraryId || !itineraries) return null;
+    
+    const selectedItinerary = itineraries.find((it) => it.id === selectedItineraryId);
+    if (!selectedItinerary) return null;
+    
+    const leg = selectedItinerary.legs[navigation.currentLegIndex];
+    if (!leg?.polyline) return null;
+    
+    const coords = decodePolyline(leg.polyline);
+    if (coords.length === 0) return null;
+    
+    const index = Math.floor(navigation.progressOnLeg * (coords.length - 1));
+    return coords[index];
+  }, [navigation, selectedItineraryId, itineraries]);
 
   return (
     <div className="absolute inset-0 z-0">
@@ -50,6 +74,7 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
         
         <MapClickHandler />
         <MapBoundsHandler />
+        <NavigationSimulator />
         
         {/* Render polylines ONLY for selected itinerary */}
         {itineraries?.map((itinerary) => {
@@ -71,8 +96,11 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
         })}
         
         {/* Markers */}
-        {from && <Marker position={[from.lat, from.lon]} icon={fromIcon} />}
+        {from && !navigation.isNavigating && <Marker position={[from.lat, from.lon]} icon={fromIcon} />}
         {to && <Marker position={[to.lat, to.lon]} icon={toIcon} />}
+        {userPosition && navigation.isNavigating && (
+          <Marker position={userPosition} icon={userIcon} />
+        )}
       </MapContainer>
     </div>
   );
@@ -146,6 +174,84 @@ function MapBoundsHandler() {
   return null;
 }
 
+// Component to simulate navigation movement
+function NavigationSimulator() {
+  const { 
+    navigation, 
+    selectedItineraryId, 
+    itineraries, 
+    updateNavigationProgress,
+    resetNavigation 
+  } = usePlanStore();
+  const animationFrameRef = useRef<number>();
+  const lastTimeRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    if (!navigation.isNavigating || navigation.isPaused || !selectedItineraryId || !itineraries) {
+      return;
+    }
+
+    const selectedItinerary = itineraries.find((it) => it.id === selectedItineraryId);
+    if (!selectedItinerary) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const deltaTime = (now - lastTimeRef.current) / 1000; // seconds
+      lastTimeRef.current = now;
+
+      const currentLeg = selectedItinerary.legs[navigation.currentLegIndex];
+      if (!currentLeg) {
+        resetNavigation();
+        return;
+      }
+
+      // Calculate distance traveled based on speed and time
+      const distanceTraveled = navigation.speed * deltaTime;
+      const legDistance = currentLeg.distance;
+      const progressIncrement = distanceTraveled / legDistance;
+
+      let newProgress = navigation.progressOnLeg + progressIncrement;
+      let newLegIndex = navigation.currentLegIndex;
+
+      // Check if we've completed the current leg
+      if (newProgress >= 1) {
+        newProgress = 0;
+        newLegIndex += 1;
+
+        // Check if we've completed all legs
+        if (newLegIndex >= selectedItinerary.legs.length) {
+          resetNavigation();
+          return;
+        }
+      }
+
+      updateNavigationProgress(newLegIndex, newProgress);
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    lastTimeRef.current = Date.now();
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [
+    navigation.isNavigating,
+    navigation.isPaused,
+    navigation.currentLegIndex,
+    navigation.progressOnLeg,
+    navigation.speed,
+    selectedItineraryId,
+    itineraries,
+    updateNavigationProgress,
+    resetNavigation,
+  ]);
+
+  return null;
+}
+
 // Component to render polylines for an itinerary
 type ItineraryPolylinesProps = {
   itinerary: NormalizedItinerary;
@@ -153,13 +259,30 @@ type ItineraryPolylinesProps = {
 };
 
 function ItineraryPolylines({ itinerary, highlight }: ItineraryPolylinesProps) {
+  const { navigation, selectedItineraryId } = usePlanStore();
+  const isNavigating = navigation.isNavigating && itinerary.id === selectedItineraryId;
+
   return (
     <>
       {itinerary.legs.map((leg, idx) => {
         if (!leg.polyline) return null;
 
-        const coords = decodePolyline(leg.polyline);
+        let coords = decodePolyline(leg.polyline);
         if (coords.length === 0) return null;
+
+        // If navigating, only show remaining route
+        if (isNavigating) {
+          if (idx < navigation.currentLegIndex) {
+            // Skip legs that have been completed
+            return null;
+          } else if (idx === navigation.currentLegIndex) {
+            // Show only remaining portion of current leg
+            const startIndex = Math.floor(navigation.progressOnLeg * (coords.length - 1));
+            coords = coords.slice(startIndex);
+            if (coords.length === 0) return null;
+          }
+          // For future legs (idx > currentLegIndex), show entire leg
+        }
 
         const style = highlight
           ? getHighlightedLegStyle(leg.mode)

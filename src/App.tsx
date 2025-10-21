@@ -6,6 +6,7 @@ import Controls from './components/Controls';
 import ItineraryList from './components/ItineraryList';
 import ItineraryDetail from './components/ItineraryDetail';
 import SystemHealthChip from './components/SystemHealthChip';
+import NavigationControls from './components/NavigationControls';
 import 'leaflet/dist/leaflet.css';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
 
       {/* UI Overlays */}
       <SystemHealthChip />
+      <NavigationControls />
       
       {/* Search and Controls Panel - Compact Left Side */}
       <div className="absolute top-16 left-0 right-0 md:left-3 md:right-auto z-[900] md:w-80 md:max-w-[calc(40%-1rem)] pointer-events-none">

@@ -26,6 +26,14 @@ export type NormalizedItinerary = {
   legs: NormalizedLeg[];
 };
 
+export type NavigationState = {
+  isNavigating: boolean;
+  isPaused: boolean;
+  currentLegIndex: number;
+  progressOnLeg: number; // 0 to 1
+  speed: number; // meters per second
+};
+
 export type AppState = {
   from?: Coord;
   to?: Coord;
@@ -38,5 +46,6 @@ export type AppState = {
   pickingMode?: 'from' | 'to' | null;
   isLoading: boolean;
   error?: string;
+  navigation: NavigationState;
 };
 

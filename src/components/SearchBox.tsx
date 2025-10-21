@@ -104,7 +104,6 @@ export default function SearchBox({ type }: SearchBoxProps) {
 
   const label = type === 'from' ? 'From' : 'To';
   const icon = type === 'from' ? '🟢' : '🔴';
-  const markerColor = type === 'from' ? 'text-green-600' : 'text-red-600';
 
   return (
     <div className="relative">

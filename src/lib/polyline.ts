@@ -15,7 +15,7 @@ export function decodePolyline(encoded?: string | null): LatLngTuple[] {
     
     // Validate: check if coordinates are reasonable (within Philippines bounds)
     // Philippines is roughly lat: 4-21, lon: 116-127
-    const isValid = decoded.every(([lat, lon]) => 
+    const isValid = decoded.every(([lat, lon]: [number, number]) => 
       lat >= 4 && lat <= 21 && lon >= 116 && lon <= 127
     );
     

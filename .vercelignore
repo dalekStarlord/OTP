@@ -1,0 +1,16 @@
+node_modules
+.git
+.vscode
+*.md
+!README.md
+*.log
+.env.local
+.DS_Store
+src
+public
+vite.config.ts
+tsconfig.json
+tsconfig.node.json
+postcss.config.js
+tailwind.config.js
+

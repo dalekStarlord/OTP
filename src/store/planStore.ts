@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AppState, Coord, NormalizedItinerary } from '../lib/types';
+import type { AppState, Coord, NormalizedItinerary, NavigationState } from '../lib/types';
 
 type PlanStore = AppState & {
   setFrom: (coord?: Coord) => void;
@@ -13,7 +13,21 @@ type PlanStore = AppState & {
   setPickingMode: (mode: 'from' | 'to' | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error?: string) => void;
+  setNavigation: (navigation: NavigationState) => void;
+  startNavigation: () => void;
+  pauseNavigation: () => void;
+  resumeNavigation: () => void;
+  resetNavigation: () => void;
+  updateNavigationProgress: (legIndex: number, progress: number) => void;
   clear: () => void;
+};
+
+const initialNavigationState: NavigationState = {
+  isNavigating: false,
+  isPaused: false,
+  currentLegIndex: 0,
+  progressOnLeg: 0,
+  speed: 10, // 10 m/s (~36 km/h, typical jeepney speed)
 };
 
 const initialState: AppState = {
@@ -28,6 +42,7 @@ const initialState: AppState = {
   pickingMode: null,
   isLoading: false,
   error: undefined,
+  navigation: initialNavigationState,
 };
 
 export const usePlanStore = create<PlanStore>((set) => ({
@@ -43,6 +58,33 @@ export const usePlanStore = create<PlanStore>((set) => ({
   setPickingMode: (mode) => set({ pickingMode: mode }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
+  setNavigation: (navigation) => set({ navigation }),
+  startNavigation: () =>
+    set({
+      navigation: {
+        ...initialNavigationState,
+        isNavigating: true,
+        isPaused: false,
+      },
+    }),
+  pauseNavigation: () =>
+    set((state) => ({
+      navigation: { ...state.navigation, isPaused: true },
+    })),
+  resumeNavigation: () =>
+    set((state) => ({
+      navigation: { ...state.navigation, isPaused: false },
+    })),
+  resetNavigation: () =>
+    set({ navigation: initialNavigationState }),
+  updateNavigationProgress: (legIndex, progress) =>
+    set((state) => ({
+      navigation: {
+        ...state.navigation,
+        currentLegIndex: legIndex,
+        progressOnLeg: progress,
+      },
+    })),
   clear: () =>
     set({
       from: undefined,
@@ -51,6 +93,7 @@ export const usePlanStore = create<PlanStore>((set) => ({
       selectedItineraryId: undefined,
       error: undefined,
       pickingMode: null,
+      navigation: initialNavigationState,
     }),
 }));
 
