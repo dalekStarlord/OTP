@@ -1,0 +1,189 @@
+{
+  "app": {
+    "title": "CDO Jeepney Planner",
+    "tagline": "Navigate sa Cagayan de Oro nga sayon"
+  },
+  "nav": {
+    "home": "Plano sa Biyahe",
+    "live": "Live Tracker",
+    "favorites": "Mga Paborito",
+    "advisories": "Mga Pahibalo",
+    "contribute": "Taho",
+    "settings": "Mga Setting"
+  },
+  "search": {
+    "from": "Gikan",
+    "to": "Paingon",
+    "fromPlaceholder": "Imong lokasyon o address",
+    "toPlaceholder": "Asa man?",
+    "useCurrentLocation": "Gamita ang karon nga lokasyon",
+    "recent": "Bag-ong Pangita",
+    "favorites": "Mga Paborito",
+    "searching": "Nagpangita...",
+    "noResults": "Walay resulta",
+    "swap": "Ilisi ang mga lokasyon"
+  },
+  "quickPlaces": {
+    "home": "Balay",
+    "work": "Trabaho",
+    "university": "Unibersidad"
+  },
+  "modes": {
+    "jeepney": "Jeepney",
+    "bus": "Bus",
+    "tricycle": "Tricycle",
+    "walk": "Lakaw",
+    "ferry": "Barko"
+  },
+  "sort": {
+    "fastest": "Pinaka-paspas",
+    "cheapest": "Pinaka-barato",
+    "fewestTransfers": "Diyutay nga balhin"
+  },
+  "results": {
+    "title": "Mga opsyon sa ruta",
+    "noResults": "Walay nakit-an nga ruta",
+    "loading": "Nagpangita ug mga ruta...",
+    "totalTime": "Tibuok oras",
+    "fare": "Pletehan",
+    "transfers": "balhin",
+    "transfer": "balhin",
+    "noTransfers": "Direkta",
+    "viewSteps": "Tan-awa ang mga lakang",
+    "hideSteps": "Tago ang mga lakang",
+    "selectRoute": "Pilia ning ruta"
+  },
+  "steps": {
+    "walk": "Maglakaw",
+    "board": "Sakay",
+    "alight": "Kanaog sa",
+    "transfer": "Balhin",
+    "arrive": "Moabot sa",
+    "distance": "gilay-on",
+    "duration": "gidugayon"
+  },
+  "live": {
+    "title": "Live Tracker",
+    "noVehicles": "Walay sakyanan duol",
+    "arriving": "Moabot na",
+    "route": "Ruta",
+    "headsign": "Destinasyon",
+    "eta": "ETA",
+    "congestion": "Trapiko"
+  },
+  "favorites": {
+    "title": "Mga Paborito",
+    "places": "Mga Lugar",
+    "routes": "Mga Ruta",
+    "noPlaces": "Walay gi-save nga lugar",
+    "noRoutes": "Walay gi-save nga ruta",
+    "save": "I-save",
+    "remove": "Kuhaa",
+    "edit": "Usba"
+  },
+  "advisories": {
+    "title": "Mga Pahibalo sa Serbisyo",
+    "noAdvisories": "Walay pahibalo karon",
+    "routeClosed": "Sirado ang ruta",
+    "reroute": "Gi-usab ang ruta",
+    "delay": "Delayed",
+    "fareChange": "Gi-usab ang pletehan",
+    "viewAlternatives": "Tan-awa ang lain"
+  },
+  "contribute": {
+    "title": "Taho ug Problema",
+    "description": "Tabangi kami nga mopaayo pinaagi sa pagtaho sa sayop nga impormasyon",
+    "type": "Unsa may sayop?",
+    "types": {
+      "wrongStop": "Sayop nga lokasyon sa paradahan",
+      "wrongRoute": "Sayop nga ruta",
+      "wrongName": "Sayop nga ngalan",
+      "missing": "Kulang ang impormasyon",
+      "other": "Lain pa"
+    },
+    "details": "Mga Detalye",
+    "detailsPlaceholder": "Palihug ihulagway ang problema...",
+    "submit": "Isumiter ang taho",
+    "submitting": "Gisumiter...",
+    "success": "Salamat! Nadawat na ang imong taho.",
+    "error": "Wala masumiter. Sulayi pag-usab."
+  },
+  "settings": {
+    "title": "Mga Setting",
+    "appearance": "Dagway",
+    "theme": "Theme",
+    "themeLight": "Hayag",
+    "themeDark": "Ngitngit",
+    "themeAuto": "Auto",
+    "language": "Pinulongan",
+    "languages": {
+      "en": "English",
+      "fil": "Filipino",
+      "ceb": "Cebuano"
+    },
+    "accessibility": "Accessibility",
+    "textSize": "Gidak-on sa text",
+    "highContrast": "Taas nga contrast",
+    "reducedMotion": "Gamay nga paglihok",
+    "preferences": "Mga Gusto",
+    "defaultModes": "Gusto nga transportasyon",
+    "notifications": "Mga Pahibalo",
+    "notifyDelays": "Pahibalo mahitungod sa delay",
+    "notifyAlternatives": "Sugyot ug lain",
+    "about": "Mahitungod",
+    "version": "Bersyon",
+    "help": "Unsaon paggamit"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline - nagpakita sa saved data",
+    "fetching": "Nagload...",
+    "gpsLock": "Gikuha ang imong lokasyon...",
+    "computing": "Gikalikula ang mga ruta...",
+    "syncing": "Nagsync...",
+    "error": "May sayop"
+  },
+  "errors": {
+    "networkError": "Dili makaabot sa server - nagpakita sa saved routes",
+    "geocodeFailed": "Wala makit-an ang lokasyon. Sulayi nga mas tino.",
+    "routeFailed": "Walay nakit-an nga ruta. Sulayi ang lain nga lokasyon o transportasyon.",
+    "locationDenied": "Wala tugoti ang lokasyon. Palihug butangi ug address.",
+    "retry": "Sulayi pag-usab",
+    "dismiss": "Sirado"
+  },
+  "help": {
+    "title": "Unsaon paggamit",
+    "step1": "Ibutang ang imong sugod ug destinasyon",
+    "step2": "Pilia ang gusto nga transportasyon",
+    "step3": "Pilia ug ruta ug sunod sa mga lakang",
+    "gotIt": "Nasabtan!",
+    "skip": "Laktawa"
+  },
+  "a11y": {
+    "skipToMain": "Laktaw ngadto sa pangunahing content",
+    "menu": "Menu",
+    "close": "Sirado",
+    "loading": "Nagload",
+    "mapMarker": "Marka sa mapa",
+    "routeLine": "Linya sa ruta sa mapa",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "myLocation": "I-center sa akong lokasyon"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Kanselahon",
+    "save": "I-save",
+    "delete": "Kuhaa",
+    "edit": "Usba",
+    "clear": "Limpyoha",
+    "undo": "Ibalik",
+    "back": "Balik",
+    "next": "Sunod",
+    "done": "Tapos na",
+    "loading": "Nagload...",
+    "error": "May sayop",
+    "success": "Malampuson"
+  }
+}
+

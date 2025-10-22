@@ -1,0 +1,189 @@
+{
+  "app": {
+    "title": "CDO Jeepney Planner",
+    "tagline": "Mag-navigate sa Cagayan de Oro nang madali"
+  },
+  "nav": {
+    "home": "Planuhin ang Biyahe",
+    "live": "Live Tracker",
+    "favorites": "Mga Paborito",
+    "advisories": "Mga Abiso",
+    "contribute": "Mag-ulat",
+    "settings": "Mga Setting"
+  },
+  "search": {
+    "from": "Mula",
+    "to": "Papunta",
+    "fromPlaceholder": "Iyong lokasyon o address",
+    "toPlaceholder": "Saan pupunta?",
+    "useCurrentLocation": "Gamitin ang kasalukuyang lokasyon",
+    "recent": "Kamakailang Hanapin",
+    "favorites": "Mga Paborito",
+    "searching": "Naghahanap...",
+    "noResults": "Walang resulta",
+    "swap": "Palitan ang mga lokasyon"
+  },
+  "quickPlaces": {
+    "home": "Bahay",
+    "work": "Trabaho",
+    "university": "Unibersidad"
+  },
+  "modes": {
+    "jeepney": "Jeepney",
+    "bus": "Bus",
+    "tricycle": "Tricycle",
+    "walk": "Lakad",
+    "ferry": "Barko"
+  },
+  "sort": {
+    "fastest": "Pinakamabilis",
+    "cheapest": "Pinakamura",
+    "fewestTransfers": "Kaunting lipat"
+  },
+  "results": {
+    "title": "Mga opsyon ng ruta",
+    "noResults": "Walang nahanap na ruta",
+    "loading": "Naghahanap ng mga ruta...",
+    "totalTime": "Kabuuang oras",
+    "fare": "Pamasahe",
+    "transfers": "lipat",
+    "transfer": "lipat",
+    "noTransfers": "Diretso",
+    "viewSteps": "Tingnan ang mga hakbang",
+    "hideSteps": "Itago ang mga hakbang",
+    "selectRoute": "Piliin ang ruta"
+  },
+  "steps": {
+    "walk": "Maglakad",
+    "board": "Sumakay",
+    "alight": "Bumaba sa",
+    "transfer": "Lumipat",
+    "arrive": "Dumating sa",
+    "distance": "distansya",
+    "duration": "tagal"
+  },
+  "live": {
+    "title": "Live Tracker",
+    "noVehicles": "Walang sasakyan malapit",
+    "arriving": "Darating",
+    "route": "Ruta",
+    "headsign": "Destinasyon",
+    "eta": "ETA",
+    "congestion": "Trapiko"
+  },
+  "favorites": {
+    "title": "Mga Paborito",
+    "places": "Mga Lugar",
+    "routes": "Mga Ruta",
+    "noPlaces": "Walang naka-save na lugar",
+    "noRoutes": "Walang naka-save na ruta",
+    "save": "I-save",
+    "remove": "Alisin",
+    "edit": "I-edit"
+  },
+  "advisories": {
+    "title": "Mga Abiso sa Serbisyo",
+    "noAdvisories": "Walang abiso sa ngayon",
+    "routeClosed": "Sarado ang ruta",
+    "reroute": "Binago ang ruta",
+    "delay": "Delayed",
+    "fareChange": "Binago ang pamasahe",
+    "viewAlternatives": "Tingnan ang iba"
+  },
+  "contribute": {
+    "title": "Mag-ulat ng Problema",
+    "description": "Tulungan kaming mapabuti sa pag-ulat ng maling impormasyon",
+    "type": "Ano ang mali?",
+    "types": {
+      "wrongStop": "Maling lokasyon ng hintayan",
+      "wrongRoute": "Maling ruta",
+      "wrongName": "Maling pangalan",
+      "missing": "Kulang ang impormasyon",
+      "other": "Iba pa"
+    },
+    "details": "Mga Detalye",
+    "detailsPlaceholder": "Mangyaring ilarawan ang problema...",
+    "submit": "Isumite ang ulat",
+    "submitting": "Isinusumite...",
+    "success": "Salamat! Natanggap na ang iyong ulat.",
+    "error": "Hindi naisumite. Subukan ulit."
+  },
+  "settings": {
+    "title": "Mga Setting",
+    "appearance": "Hitsura",
+    "theme": "Theme",
+    "themeLight": "Maliwanag",
+    "themeDark": "Madilim",
+    "themeAuto": "Auto",
+    "language": "Wika",
+    "languages": {
+      "en": "English",
+      "fil": "Filipino",
+      "ceb": "Cebuano"
+    },
+    "accessibility": "Accessibility",
+    "textSize": "Laki ng text",
+    "highContrast": "Mataas na contrast",
+    "reducedMotion": "Binawasan ang paggalaw",
+    "preferences": "Mga Kagustuhan",
+    "defaultModes": "Ginustong transportasyon",
+    "notifications": "Mga Notipikasyon",
+    "notifyDelays": "Abisuhan tungkol sa delay",
+    "notifyAlternatives": "Mag-suggest ng iba",
+    "about": "Tungkol",
+    "version": "Bersyon",
+    "help": "Paano gumagana"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline - showing saved data",
+    "fetching": "Naglo-load...",
+    "gpsLock": "Kinukuha ang iyong lokasyon...",
+    "computing": "Kinakalkula ang mga ruta...",
+    "syncing": "Nag-sync...",
+    "error": "May error"
+  },
+  "errors": {
+    "networkError": "Hindi maabot ang server - showing saved routes",
+    "geocodeFailed": "Hindi mahanap ang lokasyon. Subukan na mas tukoy.",
+    "routeFailed": "Walang nahanap na ruta. Subukan ang ibang lokasyon o transportasyon.",
+    "locationDenied": "Hindi pinahintulutan ang lokasyon. Mangyaring maglagay ng address.",
+    "retry": "Subukan ulit",
+    "dismiss": "Isara"
+  },
+  "help": {
+    "title": "Paano gumagana",
+    "step1": "Ilagay ang iyong simula at destinasyon",
+    "step2": "Piliin ang ginustong transportasyon",
+    "step3": "Pumili ng ruta at sundin ang mga hakbang",
+    "gotIt": "Naintindihan ko!",
+    "skip": "Laktawan"
+  },
+  "a11y": {
+    "skipToMain": "Tumalon sa pangunahing content",
+    "menu": "Menu",
+    "close": "Isara",
+    "loading": "Naglo-load",
+    "mapMarker": "Marka sa mapa",
+    "routeLine": "Linya ng ruta sa mapa",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "myLocation": "I-center sa aking lokasyon"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Kanselahin",
+    "save": "I-save",
+    "delete": "Tanggalin",
+    "edit": "I-edit",
+    "clear": "Linisin",
+    "undo": "Ibalik",
+    "back": "Bumalik",
+    "next": "Susunod",
+    "done": "Tapos na",
+    "loading": "Naglo-load...",
+    "error": "May error",
+    "success": "Tagumpay"
+  }
+}
+

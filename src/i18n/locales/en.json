@@ -1,0 +1,189 @@
+{
+  "app": {
+    "title": "CDO Jeepney Planner",
+    "tagline": "Navigate Cagayan de Oro with ease"
+  },
+  "nav": {
+    "home": "Plan Trip",
+    "live": "Live Tracker",
+    "favorites": "Favorites",
+    "advisories": "Advisories",
+    "contribute": "Contribute",
+    "settings": "Settings"
+  },
+  "search": {
+    "from": "From",
+    "to": "To",
+    "fromPlaceholder": "Your location or address",
+    "toPlaceholder": "Where to?",
+    "useCurrentLocation": "Use current location",
+    "recent": "Recent",
+    "favorites": "Favorites",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "swap": "Swap locations"
+  },
+  "quickPlaces": {
+    "home": "Home",
+    "work": "Work",
+    "university": "University"
+  },
+  "modes": {
+    "jeepney": "Jeepney",
+    "bus": "Bus",
+    "tricycle": "Tricycle",
+    "walk": "Walk",
+    "ferry": "Ferry"
+  },
+  "sort": {
+    "fastest": "Fastest",
+    "cheapest": "Cheapest",
+    "fewestTransfers": "Fewest transfers"
+  },
+  "results": {
+    "title": "Route options",
+    "noResults": "No routes found",
+    "loading": "Finding routes...",
+    "totalTime": "Total time",
+    "fare": "Fare",
+    "transfers": "transfers",
+    "transfer": "transfer",
+    "noTransfers": "Direct",
+    "viewSteps": "View steps",
+    "hideSteps": "Hide steps",
+    "selectRoute": "Select this route"
+  },
+  "steps": {
+    "walk": "Walk",
+    "board": "Board",
+    "alight": "Get off at",
+    "transfer": "Transfer",
+    "arrive": "Arrive at",
+    "distance": "distance",
+    "duration": "duration"
+  },
+  "live": {
+    "title": "Live Tracker",
+    "noVehicles": "No vehicles nearby",
+    "arriving": "Arriving",
+    "route": "Route",
+    "headsign": "Headsign",
+    "eta": "ETA",
+    "congestion": "Traffic"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "places": "Places",
+    "routes": "Routes",
+    "noPlaces": "No saved places yet",
+    "noRoutes": "No saved routes yet",
+    "save": "Save",
+    "remove": "Remove",
+    "edit": "Edit"
+  },
+  "advisories": {
+    "title": "Service Advisories",
+    "noAdvisories": "No advisories at this time",
+    "routeClosed": "Route closed",
+    "reroute": "Re-routed",
+    "delay": "Delayed",
+    "fareChange": "Fare change",
+    "viewAlternatives": "View alternatives"
+  },
+  "contribute": {
+    "title": "Report an Issue",
+    "description": "Help us improve by reporting incorrect information",
+    "type": "What's wrong?",
+    "types": {
+      "wrongStop": "Wrong stop location",
+      "wrongRoute": "Wrong route",
+      "wrongName": "Wrong name",
+      "missing": "Missing information",
+      "other": "Other"
+    },
+    "details": "Details",
+    "detailsPlaceholder": "Please describe the issue...",
+    "submit": "Submit report",
+    "submitting": "Submitting...",
+    "success": "Thank you! Your report has been submitted.",
+    "error": "Failed to submit report. Please try again."
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeAuto": "Auto",
+    "language": "Language",
+    "languages": {
+      "en": "English",
+      "fil": "Filipino",
+      "ceb": "Cebuano"
+    },
+    "accessibility": "Accessibility",
+    "textSize": "Text size",
+    "highContrast": "High contrast",
+    "reducedMotion": "Reduced motion",
+    "preferences": "Preferences",
+    "defaultModes": "Preferred modes",
+    "notifications": "Notifications",
+    "notifyDelays": "Notify about delays",
+    "notifyAlternatives": "Suggest alternatives",
+    "about": "About",
+    "version": "Version",
+    "help": "How it works"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline - showing saved data",
+    "fetching": "Loading...",
+    "gpsLock": "Getting your location...",
+    "computing": "Computing routes...",
+    "syncing": "Syncing...",
+    "error": "Error"
+  },
+  "errors": {
+    "networkError": "Can't reach server - showing saved routes",
+    "geocodeFailed": "Couldn't find that location. Try being more specific.",
+    "routeFailed": "Couldn't find a route. Try different locations or modes.",
+    "locationDenied": "Location access denied. Please enter an address.",
+    "retry": "Retry",
+    "dismiss": "Dismiss"
+  },
+  "help": {
+    "title": "How it works",
+    "step1": "Enter your starting point and destination",
+    "step2": "Choose your preferred transport modes",
+    "step3": "Select a route and follow the step-by-step directions",
+    "gotIt": "Got it!",
+    "skip": "Skip tour"
+  },
+  "a11y": {
+    "skipToMain": "Skip to main content",
+    "menu": "Menu",
+    "close": "Close",
+    "loading": "Loading",
+    "mapMarker": "Map marker",
+    "routeLine": "Route line on map",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "myLocation": "Center on my location"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "clear": "Clear",
+    "undo": "Undo",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}
+
