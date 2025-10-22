@@ -24,13 +24,17 @@ export function Home() {
   const { filters, setFilters, setStatus, addToast, addRecentSearch } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredItineraryId, setHoveredItineraryId] = useState<string | null>(null);
+  const [autoSearchTriggered, setAutoSearchTriggered] = useState(false);
 
-  // Auto-search when from and to are set
+  // Auto-search when from and to are set (only once per change)
   useEffect(() => {
-    if (from && to) {
+    if (from && to && !autoSearchTriggered) {
+      setAutoSearchTriggered(true);
       handlePlanRoute();
+    } else if (!from || !to) {
+      setAutoSearchTriggered(false);
     }
-  }, [from, to]);
+  }, [from, to, autoSearchTriggered]);
 
   const handlePlanRoute = async () => {
     if (!from || !to) {
@@ -99,14 +103,14 @@ export function Home() {
   };
 
   return (
-    <div className="h-screen w-full relative overflow-hidden bg-gray-50">
+    <div className="h-screen w-full relative overflow-hidden bg-gray-50 dark:bg-gray-900">
       {/* Map layer */}
       <MapView hoveredItineraryId={hoveredItineraryId} />
 
       {/* Main content */}
       <main id="main-content" className="relative z-10 h-full flex flex-col md:flex-row">
         {/* Left sidebar - Search & Controls */}
-        <div className="w-full md:w-96 bg-white md:h-full overflow-y-auto shadow-xl flex flex-col">
+        <div className="w-full md:w-96 bg-white dark:bg-gray-800 md:h-full overflow-y-auto shadow-xl flex flex-col">
           <div className="p-4 space-y-4 flex-1">
             {/* Search boxes */}
             <div className="relative space-y-3">
@@ -140,12 +144,12 @@ export function Home() {
             {/* Filters toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="w-full flex items-center justify-between px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full flex items-center justify-between px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-gray-700 dark:text-gray-200">
                 {t('results.title')} • {t(`sort.${filters.sortBy}`)}
               </span>
-              <SlidersHorizontal className="h-5 w-5 text-gray-600" />
+              <SlidersHorizontal className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             </button>
 
             {/* Filters panel */}
@@ -155,11 +159,11 @@ export function Home() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  className="space-y-4 border-2 border-gray-200 rounded-lg p-4"
+                  className="space-y-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg p-4"
                 >
                   {/* Sort options */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                       Sort by
                     </label>
                     <div className="flex gap-2">
@@ -205,7 +209,7 @@ export function Home() {
             {/* Results list */}
             {itineraries && itineraries.length > 0 && (
               <div className="space-y-3">
-                <h2 className="font-bold text-lg text-gray-900">
+                <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">
                   {itineraries.length} {t('results.title')}
                 </h2>
                 
@@ -223,7 +227,7 @@ export function Home() {
 
             {/* No results */}
             {itineraries && itineraries.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <p>{t('results.noResults')}</p>
               </div>
             )}

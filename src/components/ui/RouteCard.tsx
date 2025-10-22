@@ -50,10 +50,10 @@ export function RouteCard({
       onHoverStart={() => onHover?.(true)}
       onHoverEnd={() => onHover?.(false)}
       className={cn(
-        'bg-white rounded-xl shadow-md border-2 transition-all cursor-pointer',
+        'bg-white dark:bg-gray-800 rounded-xl shadow-md border-2 transition-all cursor-pointer',
         selected
-          ? 'border-blue-600 ring-2 ring-blue-600 ring-offset-2'
-          : 'border-gray-200 hover:border-blue-400'
+          ? 'border-blue-600 ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-gray-900'
+          : 'border-gray-200 dark:border-gray-700 hover:border-blue-400'
       )}
       onClick={onSelect}
       role="button"
@@ -72,33 +72,33 @@ export function RouteCard({
         <div className="flex items-center justify-between gap-4">
           {/* Duration */}
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-gray-600" aria-hidden="true" />
+            <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
             <div>
-              <div className="font-bold text-lg text-gray-900">
+              <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
                 {formatDuration(itinerary.duration, i18n.language)}
               </div>
-              <div className="text-xs text-gray-500">{t('results.totalTime')}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{t('results.totalTime')}</div>
             </div>
           </div>
 
           {/* Fare */}
           <div className="flex items-center gap-2">
             <div className="text-right">
-              <div className="font-bold text-lg text-gray-900">
+              <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
                 {formatFare(fare)}
               </div>
-              <div className="text-xs text-gray-500">{t('results.fare')}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{t('results.fare')}</div>
             </div>
           </div>
 
           {/* Transfers */}
           <div className="flex items-center gap-2">
-            <ArrowRightLeft className="h-5 w-5 text-gray-600" aria-hidden="true" />
+            <ArrowRightLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
             <div>
-              <div className="font-bold text-lg text-gray-900">
+              <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
                 {itinerary.transfers}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 {itinerary.transfers === 0
                   ? t('results.noTransfers')
                   : itinerary.transfers === 1
@@ -138,7 +138,7 @@ export function RouteCard({
             e.stopPropagation();
             setShowDetails(!showDetails);
           }}
-          className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+          className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
         >
           {showDetails ? (
             <>
@@ -159,7 +159,7 @@ export function RouteCard({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="mt-4 space-y-3 border-t pt-3"
+            className="mt-4 space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3"
           >
             {itinerary.legs.map((leg, index) => (
               <div key={index} className="flex gap-3">
@@ -176,15 +176,15 @@ export function RouteCard({
                 </div>
 
                 <div className="flex-1 pb-2">
-                  <div className="font-medium text-gray-900">
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
                     {leg.mode === 'WALK'
                       ? t('steps.walk')
                       : `${t('steps.board')} ${leg.lineName || t(`modes.${leg.mode.toLowerCase()}`)}`}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
                     {leg.from.name} → {leg.to.name}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                     {formatDuration(leg.duration, i18n.language)} • {(leg.distance / 1000).toFixed(1)} km
                   </div>
                 </div>

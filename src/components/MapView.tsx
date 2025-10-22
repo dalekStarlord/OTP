@@ -66,6 +66,10 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
         zoom={13}
         className="h-full w-full"
         zoomControl={false}
+        dragging={true}
+        touchZoom={true}
+        scrollWheelZoom={true}
+        doubleClickZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -109,14 +113,23 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
 // Component to handle map clicks for picking locations
 function MapClickHandler() {
   const { pickingMode, setFrom, setTo, setPickingMode } = usePlanStore();
+  const map = useMap();
+
+  useEffect(() => {
+    if (pickingMode) {
+      map.getContainer().style.cursor = 'crosshair';
+    } else {
+      map.getContainer().style.cursor = '';
+    }
+  }, [pickingMode, map]);
 
   useMapEvents({
     click: (e) => {
       if (pickingMode === 'from') {
-        setFrom({ lat: e.latlng.lat, lon: e.latlng.lng });
+        setFrom({ lat: e.latlng.lat, lon: e.latlng.lng, name: `Location (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)})` });
         setPickingMode(null);
       } else if (pickingMode === 'to') {
-        setTo({ lat: e.latlng.lat, lon: e.latlng.lng });
+        setTo({ lat: e.latlng.lat, lon: e.latlng.lng, name: `Location (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)})` });
         setPickingMode(null);
       }
     },

@@ -5,9 +5,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, MapPin, X, Loader2, Navigation, Clock, Star } from 'lucide-react';
+import { Search, MapPin, X, Loader2, Navigation, Clock, Star, MapPinned } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAppStore } from '../../store/appStore';
+import { usePlanStore } from '../../store/planStore';
 import { geocode } from '../../mocks/mockApi';
 import type { GeocodeResult } from '../../lib/enhanced-types';
 import type { Coord } from '../../lib/types';
@@ -31,6 +32,7 @@ export function EnhancedSearchBar({
 }: EnhancedSearchBarProps) {
   const { t } = useTranslation();
   const { recentSearches, savedPlaces, setStatus } = useAppStore();
+  const { setPickingMode } = usePlanStore();
   const [query, setQuery] = useState(value?.name || '');
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -117,6 +119,11 @@ export function EnhancedSearchBar({
     inputRef.current?.focus();
   };
 
+  const handleMapPick = () => {
+    setPickingMode(type);
+    setFocused(false);
+  };
+
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
@@ -144,12 +151,22 @@ export function EnhancedSearchBar({
 
   return (
     <div className="relative">
-      <label
-        htmlFor={`search-${type}`}
-        className="block text-sm font-medium text-gray-700 mb-1"
-      >
-        {type === 'from' ? t('search.from') : t('search.to')}
-      </label>
+      <div className="flex items-center justify-between mb-1">
+        <label
+          htmlFor={`search-${type}`}
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          {type === 'from' ? t('search.from') : t('search.to')}
+        </label>
+        <button
+          onClick={handleMapPick}
+          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1"
+          title="Click on map to select location"
+        >
+          <MapPinned className="h-3 w-3" />
+          Pick on map
+        </button>
+      </div>
 
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -175,7 +192,8 @@ export function EnhancedSearchBar({
             'w-full pl-10 pr-20 py-3 border-2 rounded-lg',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'transition-all',
-            focused ? 'border-blue-400' : 'border-gray-300'
+            'dark:bg-gray-700 dark:text-white dark:border-gray-600',
+            focused ? 'border-blue-400 dark:border-blue-500' : 'border-gray-300 dark:border-gray-600'
           )}
           aria-label={type === 'from' ? t('search.from') : t('search.to')}
           aria-autocomplete="list"
@@ -221,12 +239,12 @@ export function EnhancedSearchBar({
             transition={{ duration: 0.15 }}
             id={`search-results-${type}`}
             role="listbox"
-            className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-80 overflow-y-auto"
+            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 max-h-80 overflow-y-auto"
           >
             {/* Recent searches */}
             {showSuggestions && relevantRecent.length > 0 && (
-              <div className="p-2 border-b border-gray-100">
-                <div className="px-3 py-2 text-xs font-medium text-gray-500 flex items-center gap-2">
+              <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+                <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   <Clock className="h-3 w-3" />
                   {t('search.recent')}
                 </div>
@@ -240,10 +258,10 @@ export function EnhancedSearchBar({
                       coord,
                       type: 'poi',
                     })}
-                    className="w-full px-3 py-2 hover:bg-blue-50 rounded text-left flex items-center gap-3"
+                    className="w-full px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded text-left flex items-center gap-3"
                   >
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm">{coord.name}</span>
+                    <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="text-sm dark:text-gray-200">{coord.name}</span>
                   </button>
                 ))}
               </div>
@@ -251,8 +269,8 @@ export function EnhancedSearchBar({
 
             {/* Saved places */}
             {showSuggestions && savedPlaces.length > 0 && (
-              <div className="p-2 border-b border-gray-100">
-                <div className="px-3 py-2 text-xs font-medium text-gray-500 flex items-center gap-2">
+              <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+                <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   <Star className="h-3 w-3" />
                   {t('search.favorites')}
                 </div>
@@ -266,12 +284,12 @@ export function EnhancedSearchBar({
                       coord: place.coord,
                       type: 'poi',
                     })}
-                    className="w-full px-3 py-2 hover:bg-blue-50 rounded text-left flex items-center gap-3"
+                    className="w-full px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded text-left flex items-center gap-3"
                   >
                     <Star className="h-4 w-4 text-yellow-500" />
                     <div>
-                      <div className="text-sm font-medium">{place.name}</div>
-                      <div className="text-xs text-gray-500">{place.address}</div>
+                      <div className="text-sm font-medium dark:text-gray-200">{place.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{place.address}</div>
                     </div>
                   </button>
                 ))}
@@ -292,18 +310,18 @@ export function EnhancedSearchBar({
                       'w-full px-3 py-2 rounded text-left flex items-start gap-3',
                       'transition-colors',
                       selectedIndex === index
-                        ? 'bg-blue-100'
-                        : 'hover:bg-blue-50'
+                        ? 'bg-blue-100 dark:bg-blue-900'
+                        : 'hover:bg-blue-50 dark:hover:bg-gray-700'
                     )}
                   >
-                    <MapPin className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+                    <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {result.name}
                       </div>
-                      <div className="text-xs text-gray-500">{result.address}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{result.address}</div>
                       {result.landmark && (
-                        <div className="text-xs text-blue-600 mt-0.5">
+                        <div className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
                           Near {result.landmark}
                         </div>
                       )}
@@ -315,7 +333,7 @@ export function EnhancedSearchBar({
 
             {/* No results */}
             {query && results.length === 0 && !loading && (
-              <div className="p-6 text-center text-gray-500 text-sm">
+              <div className="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">
                 {t('search.noResults')}
               </div>
             )}

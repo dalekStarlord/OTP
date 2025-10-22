@@ -10,6 +10,16 @@ html, body, #root {
   padding: 0;
 }
 
+/* Dark mode styles */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
 /* Custom marker styles */
 .custom-marker {
   background: transparent !important;
@@ -44,4 +54,13 @@ html, body, #root {
 
 .itinerary-list::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Dark mode scrollbar */
+.dark .itinerary-list::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark .itinerary-list::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
