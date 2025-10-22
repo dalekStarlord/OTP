@@ -98,7 +98,7 @@ export default function AppEnhanced() {
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={i18n}>
         <BrowserRouter>
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Skip link for accessibility */}
             <SkipLink />
 
@@ -112,12 +112,12 @@ export default function AppEnhanced() {
             <HelpDialog />
 
             {/* Mobile header */}
-            <header className="md:hidden bg-blue-600 text-white shadow-md relative z-50">
+            <header className="md:hidden bg-blue-600 dark:bg-blue-700 text-white shadow-md relative z-50">
               <div className="flex items-center justify-between px-4 py-3">
                 <h1 className="text-xl font-bold">CDO Jeepney</h1>
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-white"
                   aria-label="Menu"
                   aria-expanded={sidebarOpen}
                 >
@@ -132,12 +132,12 @@ export default function AppEnhanced() {
 
             <div className="flex">
               {/* Desktop sidebar */}
-              <aside className="hidden md:flex md:flex-col w-64 bg-white border-r border-gray-200 min-h-screen">
+              <aside className="hidden md:flex md:flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
                 <div className="p-6">
-                  <h1 className="text-2xl font-bold text-blue-600">
+                  <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     🚌 CDO Jeepney
                   </h1>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Navigate with ease
                   </p>
                 </div>
@@ -163,13 +163,13 @@ export default function AppEnhanced() {
                       animate={{ x: 0 }}
                       exit={{ x: -280 }}
                       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                      className="fixed left-0 top-0 bottom-0 w-64 bg-white shadow-xl z-50 md:hidden"
+                      className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-xl z-50 md:hidden"
                     >
                       <div className="p-6">
-                        <h1 className="text-2xl font-bold text-blue-600">
+                        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                           🚌 CDO Jeepney
                         </h1>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           Navigate with ease
                         </p>
                       </div>
@@ -214,8 +214,8 @@ function Navigation({ onNavigate }: { onNavigate?: () => void }) {
                 'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                 'focus:outline-none focus:ring-2 focus:ring-blue-500',
                 isActive
-                  ? 'bg-blue-600 text-white font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-blue-600 dark:bg-blue-700 text-white font-medium'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
               )
             }
           >

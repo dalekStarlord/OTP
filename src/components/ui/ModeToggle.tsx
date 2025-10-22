@@ -132,7 +132,7 @@ export function ModeToggleGroup({ modes, onChange, disabled }: ModeToggleGroupPr
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
         {t('settings.defaultModes')}
       </label>
       
@@ -148,7 +148,7 @@ export function ModeToggleGroup({ modes, onChange, disabled }: ModeToggleGroupPr
         ))}
       </div>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-gray-500 dark:text-gray-400">
         Tap once to prefer, twice to exclude, three times to include
       </p>
     </div>

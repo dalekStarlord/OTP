@@ -24,17 +24,6 @@ export function Home() {
   const { filters, setFilters, setStatus, addToast, addRecentSearch } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredItineraryId, setHoveredItineraryId] = useState<string | null>(null);
-  const [autoSearchTriggered, setAutoSearchTriggered] = useState(false);
-
-  // Auto-search when from and to are set (only once per change)
-  useEffect(() => {
-    if (from && to && !autoSearchTriggered) {
-      setAutoSearchTriggered(true);
-      handlePlanRoute();
-    } else if (!from || !to) {
-      setAutoSearchTriggered(false);
-    }
-  }, [from, to, autoSearchTriggered]);
 
   const handlePlanRoute = async () => {
     if (!from || !to) {
