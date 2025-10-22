@@ -2,7 +2,7 @@
  * Home/Plan Trip page - Main journey planning interface
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlanStore } from '../store/planStore';
 import { useAppStore } from '../store/appStore';
@@ -15,7 +15,6 @@ import { planRoute } from '../mocks/mockApi';
 import { SORT_OPTIONS } from '../lib/constants';
 import { ArrowLeftRight, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Coord } from '../lib/types';
 import MapView from '../components/MapView';
 
 export function Home() {
@@ -62,6 +61,8 @@ export function Home() {
       });
 
       setItineraries(sorted);
+      // Clear any previous selection to prevent re-render issues
+      setSelectedItineraryId(undefined);
       
       // Save to recent searches
       addRecentSearch({ from, to });

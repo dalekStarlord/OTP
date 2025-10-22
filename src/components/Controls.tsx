@@ -49,7 +49,8 @@ export default function Controls() {
         const deduped = dedupeAndSort(itineraries);
         console.log('✅ Successfully planned', deduped.length, 'routes');
         setItineraries(deduped);
-        setSelectedItineraryId(deduped[0]?.id);
+        // Don't auto-select to prevent re-render issues
+        // setSelectedItineraryId(deduped[0]?.id);
       }
     } catch (error) {
       console.error('❌ GTFS Planning error:', error);

@@ -42,11 +42,16 @@ export function RouteCard({
     ['JEEPNEY', 'BUS', 'TRICYCLE', 'FERRY', 'TRANSIT'].includes(leg.mode)
   );
 
+  const handleClick = () => {
+    if (onSelect) {
+      onSelect();
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
       onHoverStart={() => onHover?.(true)}
       onHoverEnd={() => onHover?.(false)}
       className={cn(
@@ -55,13 +60,13 @@ export function RouteCard({
           ? 'border-blue-600 ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-gray-900'
           : 'border-gray-200 dark:border-gray-700 hover:border-blue-400'
       )}
-      onClick={onSelect}
+      onClick={handleClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onSelect?.();
+          handleClick();
         }
       }}
       aria-label={`Route option: ${formatDuration(itinerary.duration, i18n.language)}, ${formatFare(fare)}`}

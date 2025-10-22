@@ -143,9 +143,13 @@ function MapBoundsHandler() {
   const map = useMap();
   const { from, to, itineraries, selectedItineraryId } = usePlanStore();
   const boundsUpdatedRef = useRef(false);
+  const lastSelectedIdRef = useRef<string | undefined>();
 
   useEffect(() => {
-    if (!selectedItineraryId || !itineraries) return;
+    // Only update if selected itinerary actually changed
+    if (!selectedItineraryId || !itineraries || lastSelectedIdRef.current === selectedItineraryId) return;
+    
+    lastSelectedIdRef.current = selectedItineraryId;
 
     const selectedItinerary = itineraries.find((itin) => itin.id === selectedItineraryId);
     if (!selectedItinerary) return;
@@ -173,16 +177,16 @@ function MapBoundsHandler() {
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
       boundsUpdatedRef.current = true;
     }
-  }, [selectedItineraryId, itineraries, from, to, map]);
+  }, [selectedItineraryId, itineraries, map]);
 
-  // Initial fit to from/to markers
+  // Initial fit to from/to markers (only once)
   useEffect(() => {
     if (boundsUpdatedRef.current) return;
     if (!from || !to) return;
 
     const bounds = L.latLngBounds([[from.lat, from.lon], [to.lat, to.lon]]);
     map.fitBounds(bounds, { padding: [50, 50] });
-  }, [from, to, map]);
+  }, [from?.lat, from?.lon, to?.lat, to?.lon, map]);
 
   return null;
 }
@@ -198,14 +202,26 @@ function NavigationSimulator() {
   } = usePlanStore();
   const animationFrameRef = useRef<number>();
   const lastTimeRef = useRef<number>(Date.now());
+  const isNavigatingRef = useRef(false);
 
   useEffect(() => {
     if (!navigation.isNavigating || navigation.isPaused || !selectedItineraryId || !itineraries) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      isNavigatingRef.current = false;
       return;
     }
 
+    // Prevent multiple animations
+    if (isNavigatingRef.current) return;
+    isNavigatingRef.current = true;
+
     const selectedItinerary = itineraries.find((it) => it.id === selectedItineraryId);
-    if (!selectedItinerary) return;
+    if (!selectedItinerary) {
+      isNavigatingRef.current = false;
+      return;
+    }
 
     const animate = () => {
       const now = Date.now();
@@ -249,18 +265,9 @@ function NavigationSimulator() {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      isNavigatingRef.current = false;
     };
-  }, [
-    navigation.isNavigating,
-    navigation.isPaused,
-    navigation.currentLegIndex,
-    navigation.progressOnLeg,
-    navigation.speed,
-    selectedItineraryId,
-    itineraries,
-    updateNavigationProgress,
-    resetNavigation,
-  ]);
+  }, [navigation.isNavigating, navigation.isPaused, selectedItineraryId]);
 
   return null;
 }
