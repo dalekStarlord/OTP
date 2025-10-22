@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Gauge, ChevronDown, ChevronUp, Navigation } from 'lucide-react';
 import { usePlanStore } from '../store/planStore';
 
@@ -14,8 +14,15 @@ export default function NavigationControls() {
     setNavigation 
   } = usePlanStore();
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const hasSelectedRoute = !!selectedItineraryId;
+
+  // Auto-expand when navigation starts
+  useEffect(() => {
+    if (navigation.isNavigating) {
+      setIsCollapsed(false);
+    }
+  }, [navigation.isNavigating]);
 
   const handleSpeedChange = (newSpeed: number) => {
     setNavigation({ ...navigation, speed: newSpeed });
@@ -30,7 +37,7 @@ export default function NavigationControls() {
   const progressPercent = Math.round(navigation.progressOnLeg * 100);
 
   return (
-    <div className="fixed top-20 right-3 z-[950] w-80 bg-white rounded-xl shadow-2xl border-2 border-blue-500 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg border-2 border-blue-500 overflow-hidden">
       {/* Header - Always Visible */}
       <div 
         className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 cursor-pointer hover:from-blue-700 hover:to-blue-800 transition-all"
@@ -49,7 +56,7 @@ export default function NavigationControls() {
         </div>
         
         {/* Progress Bar - Show when navigating */}
-        {navigation.isNavigating && !isCollapsed && (
+        {navigation.isNavigating && (
           <div className="mt-2">
             <div className="flex justify-between text-xs text-white/90 mb-1">
               <span>Leg {navigation.currentLegIndex + 1} of {totalLegs}</span>
@@ -61,7 +68,7 @@ export default function NavigationControls() {
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            {currentLeg && (
+            {!isCollapsed && currentLeg && (
               <div className="text-xs text-white/90 mt-1 truncate">
                 {currentLeg.mode === 'WALK' ? '🚶 Walking' : `🚌 ${currentLeg.lineName || 'Transit'}`}
               </div>
