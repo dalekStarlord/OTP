@@ -267,36 +267,90 @@ function ItineraryPolylines({ itinerary, highlight }: ItineraryPolylinesProps) {
       {itinerary.legs.map((leg, idx) => {
         if (!leg.polyline) return null;
 
-        let coords = decodePolyline(leg.polyline);
+        const coords = decodePolyline(leg.polyline);
         if (coords.length === 0) return null;
 
-        // If navigating, only show remaining route
-        if (isNavigating) {
-          if (idx < navigation.currentLegIndex) {
-            // Skip legs that have been completed
-            return null;
-          } else if (idx === navigation.currentLegIndex) {
-            // Show only remaining portion of current leg
-            const startIndex = Math.floor(navigation.progressOnLeg * (coords.length - 1));
-            coords = coords.slice(startIndex);
-            if (coords.length === 0) return null;
-          }
-          // For future legs (idx > currentLegIndex), show entire leg
-        }
-
-        const style = highlight
+        const baseStyle = highlight
           ? getHighlightedLegStyle(leg.mode)
           : getLegStyle(leg.mode);
 
+        // If navigating, show consumed path effect
+        if (isNavigating) {
+          if (idx < navigation.currentLegIndex) {
+            // Completed legs: show in faded gray/dashed
+            return (
+              <Polyline
+                key={`${itinerary.id}-leg-${idx}-consumed`}
+                positions={coords}
+                pathOptions={{
+                  color: '#9ca3af',
+                  weight: 3,
+                  opacity: 0.4,
+                  dashArray: '5, 10',
+                }}
+              />
+            );
+          } else if (idx === navigation.currentLegIndex) {
+            // Current leg: split into consumed and remaining
+            const splitIndex = Math.floor(navigation.progressOnLeg * (coords.length - 1));
+            const consumedCoords = coords.slice(0, splitIndex + 1);
+            const remainingCoords = coords.slice(splitIndex);
+
+            return (
+              <React.Fragment key={`${itinerary.id}-leg-${idx}-split`}>
+                {/* Consumed portion - faded */}
+                {consumedCoords.length > 1 && (
+                  <Polyline
+                    positions={consumedCoords}
+                    pathOptions={{
+                      color: '#9ca3af',
+                      weight: 3,
+                      opacity: 0.4,
+                      dashArray: '5, 10',
+                    }}
+                  />
+                )}
+                {/* Remaining portion - bright */}
+                {remainingCoords.length > 1 && (
+                  <Polyline
+                    positions={remainingCoords}
+                    pathOptions={{
+                      color: baseStyle.color,
+                      weight: baseStyle.weight + 2,
+                      opacity: 1,
+                      dashArray: baseStyle.dashArray,
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            );
+          } else {
+            // Future legs: show normal
+            return (
+              <Polyline
+                key={`${itinerary.id}-leg-${idx}`}
+                positions={coords}
+                pathOptions={{
+                  color: baseStyle.color,
+                  weight: baseStyle.weight,
+                  opacity: baseStyle.opacity,
+                  dashArray: baseStyle.dashArray,
+                }}
+              />
+            );
+          }
+        }
+
+        // Not navigating: show normal
         return (
           <Polyline
             key={`${itinerary.id}-leg-${idx}`}
             positions={coords}
             pathOptions={{
-              color: style.color,
-              weight: style.weight,
-              opacity: style.opacity,
-              dashArray: style.dashArray,
+              color: baseStyle.color,
+              weight: baseStyle.weight,
+              opacity: baseStyle.opacity,
+              dashArray: baseStyle.dashArray,
             }}
           />
         );
