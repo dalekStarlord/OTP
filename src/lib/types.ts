@@ -18,7 +18,7 @@ export type NormalizedLeg = {
 
 export type NormalizedItinerary = {
   id: string;
-  source: 'transmodel' | 'gtfs';
+  source: 'gtfs';
   startTime: number; // epoch ms
   endTime: number; // epoch ms
   duration: number; // seconds
@@ -38,8 +38,6 @@ export type AppState = {
   from?: Coord;
   to?: Coord;
   dateTimeISO: string;
-  useTransmodel: boolean;
-  useGtfs: boolean;
   numItineraries: number;
   itineraries?: NormalizedItinerary[];
   selectedItineraryId?: string;

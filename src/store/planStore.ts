@@ -5,8 +5,6 @@ type PlanStore = AppState & {
   setFrom: (coord?: Coord) => void;
   setTo: (coord?: Coord) => void;
   setDateTime: (dateTime: string) => void;
-  setUseTransmodel: (use: boolean) => void;
-  setUseGtfs: (use: boolean) => void;
   setNumItineraries: (num: number) => void;
   setItineraries: (itineraries?: NormalizedItinerary[]) => void;
   setSelectedItineraryId: (id?: string) => void;
@@ -34,8 +32,6 @@ const initialState: AppState = {
   from: undefined,
   to: undefined,
   dateTimeISO: new Date().toISOString(),
-  useTransmodel: true,
-  useGtfs: true,
   numItineraries: 5,
   itineraries: undefined,
   selectedItineraryId: undefined,
@@ -50,8 +46,6 @@ export const usePlanStore = create<PlanStore>((set) => ({
   setFrom: (coord) => set({ from: coord, error: undefined }),
   setTo: (coord) => set({ to: coord, error: undefined }),
   setDateTime: (dateTime) => set({ dateTimeISO: dateTime }),
-  setUseTransmodel: (use) => set({ useTransmodel: use }),
-  setUseGtfs: (use) => set({ useGtfs: use }),
   setNumItineraries: (num) => set({ numItineraries: num }),
   setItineraries: (itineraries) => set({ itineraries }),
   setSelectedItineraryId: (id) => set({ selectedItineraryId: id }),

@@ -1,17 +1,13 @@
 import { usePlanStore } from '../store/planStore';
-import { planTripTransmodel, planTripGtfs, dedupeAndSort } from '../lib/otp';
+import { planTripGtfs, dedupeAndSort } from '../lib/otp';
 
 export default function Controls() {
   const {
     from,
     to,
     dateTimeISO,
-    useTransmodel,
-    useGtfs,
     numItineraries,
     isLoading,
-    setUseTransmodel,
-    setUseGtfs,
     setNumItineraries,
     setItineraries,
     setSelectedItineraryId,
@@ -20,7 +16,7 @@ export default function Controls() {
     clear,
   } = usePlanStore();
 
-  const canPlan = from && to && !isLoading && (useTransmodel || useGtfs);
+  const canPlan = from && to && !isLoading;
 
   async function handleGetRoutes() {
     if (!from || !to) {
@@ -28,17 +24,10 @@ export default function Controls() {
       return;
     }
 
-    if (!useTransmodel && !useGtfs) {
-      setError('Please enable at least one routing engine');
-      return;
-    }
-
     console.log('🎯 Starting route planning:', {
       from,
       to,
       dateTime: dateTimeISO,
-      useTransmodel,
-      useGtfs,
       numItineraries
     });
 
@@ -46,57 +35,25 @@ export default function Controls() {
     setError(undefined);
 
     try {
-      const promises = [];
-      const errors: string[] = [];
+      const itineraries = await planTripGtfs(from, to, dateTimeISO, numItineraries);
 
-      if (useTransmodel) {
-        promises.push(
-          planTripTransmodel(from, to, dateTimeISO, numItineraries).catch(
-            (err) => {
-              console.error('❌ Transmodel failed:', err);
-              errors.push(`Transmodel: ${err.message || 'Unknown error'}`);
-              return [];
-            }
-          )
-        );
-      }
-
-      if (useGtfs) {
-        promises.push(
-          planTripGtfs(from, to, dateTimeISO, numItineraries).catch((err) => {
-            console.error('❌ GTFS failed:', err);
-            errors.push(`GTFS: ${err.message || 'Unknown error'}`);
-            return [];
-          })
-        );
-      }
-
-      const results = await Promise.all(promises);
-      const combined = results.flat();
-
-      console.log('📊 Results:', {
-        transmodelCount: useTransmodel ? results[0]?.length || 0 : 'N/A',
-        gtfsCount: useGtfs ? results[useTransmodel ? 1 : 0]?.length || 0 : 'N/A',
-        combinedCount: combined.length,
-        errors
+      console.log('📊 GTFS Results:', {
+        count: itineraries.length
       });
 
-      if (combined.length === 0) {
-        const errorMsg = errors.length > 0 
-          ? `No routes found. Errors: ${errors.join(', ')}` 
-          : 'No routes found. Try different locations or times.';
-        setError(errorMsg);
+      if (itineraries.length === 0) {
+        setError('No routes found. Try different locations or times.');
         setItineraries(undefined);
         setSelectedItineraryId(undefined);
       } else {
-        const deduped = dedupeAndSort(combined);
+        const deduped = dedupeAndSort(itineraries);
         console.log('✅ Successfully planned', deduped.length, 'routes');
         setItineraries(deduped);
         setSelectedItineraryId(deduped[0]?.id);
       }
     } catch (error) {
-      console.error('❌ Planning error:', error);
-      setError('Failed to plan trip. Please try again.');
+      console.error('❌ GTFS Planning error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to plan trip. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -145,30 +102,6 @@ export default function Controls() {
           </summary>
           
           <div className="mt-2 space-y-2">
-            <div className="space-y-1">
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Engines</label>
-              <div className="flex flex-col gap-1">
-                <label className="flex items-center gap-1.5 cursor-pointer p-1.5 rounded hover:bg-gray-50 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={useTransmodel}
-                    onChange={(e) => setUseTransmodel(e.target.checked)}
-                    className="w-3 h-3 rounded accent-blue-600"
-                  />
-                  <span className="text-gray-700 text-[11px]">Transmodel</span>
-                </label>
-                <label className="flex items-center gap-1.5 cursor-pointer p-1.5 rounded hover:bg-gray-50 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={useGtfs}
-                    onChange={(e) => setUseGtfs(e.target.checked)}
-                    className="w-3 h-3 rounded accent-blue-600"
-                  />
-                  <span className="text-gray-700 text-[11px]">GTFS</span>
-                </label>
-              </div>
-            </div>
-
             <div>
               <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">
                 Routes
