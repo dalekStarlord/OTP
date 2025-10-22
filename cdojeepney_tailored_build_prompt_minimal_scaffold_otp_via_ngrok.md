@@ -6,16 +6,16 @@
 
 ## 0) Environment — your current OTP endpoints
 
-- **Transmodel GraphQL (routing)**: `https://8acea3d2d414.ngrok-free.app/otp/transmodel/v3`
-- **GTFS GraphQL (static index)**: `https://23b60d0223e7.ngrok-free.app/otp/gtfs/v1`
-- **Actuator/Health** (optional): `https://23b60d0223e7.ngrok-free.app/otp/actuators/health`
+- **Transmodel GraphQL (routing)**: `https://f390d61fb579.ngrok-free.app/otp/transmodel/v3`
+- **GTFS GraphQL (static index)**: `https://f390d61fb579.ngrok-free.app/otp/gtfs/v1`
+- **Actuator/Health** (optional): `https://f390d61fb579.ngrok-free.app/otp/actuators/health`
 
 Create a project `.env` (Vite) as:
 
 ```env
-VITE_OTP_TM_URL=https://23b60d0223e7.ngrok-free.app/otp/transmodel/v3
-VITE_OTP_GTFS_URL=https://23b60d0223e7.ngrok-free.app/otp/gtfs/v1
-VITE_HEALTH_URL=https://23b60d0223e7.ngrok-free.app/otp/actuators/health
+VITE_OTP_TM_URL=https://f390d61fb579.ngrok-free.app/otp/transmodel/v3
+VITE_OTP_GTFS_URL=https://f390d61fb579.ngrok-free.app/otp/gtfs/v1
+VITE_HEALTH_URL=https://f390d61fb579.ngrok-free.app/otp/actuators/health
 VITE_GEOCODER_URL=""  # optional; add Pelias/Photon later
 ```
 
@@ -538,15 +538,15 @@ npm run dev
 
 ```bash
 # Health
-curl -i https://23b60d0223e7.ngrok-free.app/otp/actuators/health
+curl -i https://f390d61fb579.ngrok-free.app/otp/actuators/health
 
 # GTFS routes
-curl -s https://23b60d0223e7.ngrok-free.app/otp/gtfs/v1 \
+curl -s https://f390d61fb579.ngrok-free.app/otp/gtfs/v1 \
   -H 'content-type: application/json' \
   -d '{"query":"{ routes { id shortName longName } }"}'
 
 # Transmodel trip
-curl -s https://23b60d0223e7.ngrok-free.app/otp/transmodel/v3 \
+curl -s https://f390d61fb579.ngrok-free.app/otp/transmodel/v3 \
   -H 'content-type: application/json' \
   -d '{"query":"query($f:InputCoordinates!,$t:InputCoordinates!,$dt:DateTime!){ trip(from:{coordinates:$f}, to:{coordinates:$t}, dateTime:$dt){ tripPatterns { duration legs { mode line { publicCode } pointsOnLink { points } }}}}", "variables":{"f":{"latitude":8.472152,"longitude":124.616295},"t":{"latitude":8.487033,"longitude":124.638092},"dt":"2025-10-21T04:30:00Z"}}'
 ```
@@ -556,7 +556,7 @@ curl -s https://23b60d0223e7.ngrok-free.app/otp/transmodel/v3 \
 ## 17) Build Prompt (paste to an AI agent)
 
 **Instruction:**
-> You are an expert React/TypeScript engineer. Scaffold and implement the CDOJeepney MVP using the file tree and code style below. Wire to the following OTP endpoints: Transmodel `https://23b60d0223e7.ngrok-free.app/otp/transmodel/v3`, GTFS `https://23b60d0223e7.ngrok-free.app/otp/gtfs/v1`, Health `https://23b60d0223e7.ngrok-free.app/otp/actuators/health`. Implement the planner (A/B inputs → Transmodel trip), map rendering (pins + polylines), routes overlay (GTFS routes), and health chip. Preserve state in URL. Ship a clean, mobile-first UI with Tailwind. Ensure code matches the exact filenames/paths below and runs with `npm run dev`.
+> You are an expert React/TypeScript engineer. Scaffold and implement the CDOJeepney MVP using the file tree and code style below. Wire to the following OTP endpoints: Transmodel `https://f390d61fb579.ngrok-free.app/otp/transmodel/v3`, GTFS `https://f390d61fb579.ngrok-free.app/otp/gtfs/v1`, Health `https://f390d61fb579.ngrok-free.app/otp/actuators/health`. Implement the planner (A/B inputs → Transmodel trip), map rendering (pins + polylines), routes overlay (GTFS routes), and health chip. Preserve state in URL. Ship a clean, mobile-first UI with Tailwind. Ensure code matches the exact filenames/paths below and runs with `npm run dev`.
 
 **Deliverables to produce:**
 1) Complete repo with files from sections **3–14**

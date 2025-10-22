@@ -54,7 +54,7 @@ Update `.env` with your OTP endpoints:
 
 ```env
 # OpenTripPlanner Base URL
-VITE_OTP_BASE=https://9776907978a6.ngrok-free.app
+VITE_OTP_BASE=https://f390d61fb579.ngrok-free.app
 
 # OTP GraphQL Endpoints (automatically derived)
 VITE_OTP_TRANS_GQL=${VITE_OTP_BASE}/otp/transmodel/v3
@@ -179,17 +179,17 @@ Test your OTP endpoints directly:
 
 ```bash
 # Health check (GraphQL __typename)
-curl -X POST https://9776907978a6.ngrok-free.app/otp/transmodel/v3 \
+curl -X POST https://f390d61fb579.ngrok-free.app/otp/transmodel/v3 \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ __typename }"}'
 
 # GTFS routes list
-curl -X POST https://9776907978a6.ngrok-free.app/otp/gtfs/v1 \
+curl -X POST https://f390d61fb579.ngrok-free.app/otp/gtfs/v1 \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ routes { id shortName longName } }"}'
 
 # Transmodel trip planning (with variables)
-curl -X POST https://9776907978a6.ngrok-free.app/otp/transmodel/v3 \
+curl -X POST https://f390d61fb579.ngrok-free.app/otp/transmodel/v3 \
   -H 'Content-Type: application/json' \
   -d '{
     "query": "query TripPlan($from: InputLocation!, $to: InputLocation!, $dateTime: DateTime!) { trip(from: $from, to: $to, dateTime: $dateTime) { tripPatterns { duration legs { mode } } } }",
