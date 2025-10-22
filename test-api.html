@@ -10,33 +10,10 @@
     <script>
         const resultsDiv = document.getElementById('results');
         
-        // Test 1: Health Check - Transmodel
-        async function testTransmodelHealth() {
-            const url = 'https://8acea3d2d414.ngrok-free.app/otp/transmodel/v3';
-            resultsDiv.innerHTML += '<h2>Test 1: Transmodel Health Check</h2>';
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        query: '{ __typename }'
-                    })
-                });
-                
-                const data = await response.json();
-                resultsDiv.innerHTML += `<p style="color: green;">✓ Transmodel: ${JSON.stringify(data)}</p>`;
-            } catch (error) {
-                resultsDiv.innerHTML += `<p style="color: red;">✗ Transmodel Error: ${error.message}</p>`;
-            }
-        }
-        
-        // Test 2: Health Check - GTFS
+        // Test 1: Health Check - GTFS
         async function testGtfsHealth() {
-            const url = 'https://8acea3d2d414.ngrok-free.app/otp/gtfs/v1';
-            resultsDiv.innerHTML += '<h2>Test 2: GTFS Health Check</h2>';
+            const url = 'https://408444805012.ngrok-free.app/otp/gtfs/v1';
+            resultsDiv.innerHTML += '<h2>Test 1: GTFS Health Check</h2>';
             
             try {
                 const response = await fetch(url, {
@@ -56,48 +33,10 @@
             }
         }
         
-        // Test 3: Transmodel Trip Query
-        async function testTransmodelTrip() {
-            const url = 'https://8acea3d2d414.ngrok-free.app/otp/transmodel/v3';
-            resultsDiv.innerHTML += '<h2>Test 3: Transmodel Trip Planning</h2>';
-            
-            const query = `
-                query TripPlan($from: InputLocation!, $to: InputLocation!, $dateTime: DateTime!) {
-                    trip(from: $from, to: $to, dateTime: $dateTime) {
-                        tripPatterns {
-                            duration
-                            legs { mode }
-                        }
-                    }
-                }
-            `;
-            
-            const variables = {
-                from: { coordinates: { latitude: 8.472152, longitude: 124.616295 } },
-                to: { coordinates: { latitude: 8.487033, longitude: 124.638092 } },
-                dateTime: new Date().toISOString()
-            };
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ query, variables })
-                });
-                
-                const data = await response.json();
-                resultsDiv.innerHTML += `<p style="color: green;">✓ Transmodel Trip: ${JSON.stringify(data, null, 2)}</p>`;
-            } catch (error) {
-                resultsDiv.innerHTML += `<p style="color: red;">✗ Transmodel Trip Error: ${error.message}</p>`;
-            }
-        }
-        
-        // Test 4: GTFS Trip Query
+        // Test 2: GTFS Trip Query
         async function testGtfsTrip() {
-            const url = 'https://8acea3d2d414.ngrok-free.app/otp/gtfs/v1';
-            resultsDiv.innerHTML += '<h2>Test 4: GTFS Trip Planning</h2>';
+            const url = 'https://408444805012.ngrok-free.app/otp/gtfs/v1';
+            resultsDiv.innerHTML += '<h2>Test 2: GTFS Trip Planning</h2>';
             
             const query = `
                 query Plan($fromLat: Float!, $fromLon: Float!, $toLat: Float!, $toLon: Float!, $dateTime: Long) {
@@ -140,9 +79,7 @@
         
         // Run all tests
         async function runTests() {
-            await testTransmodelHealth();
             await testGtfsHealth();
-            await testTransmodelTrip();
             await testGtfsTrip();
         }
         

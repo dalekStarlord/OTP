@@ -54,10 +54,9 @@ Update `.env` with your OTP endpoints:
 
 ```env
 # OpenTripPlanner Base URL
-VITE_OTP_BASE=https://f390d61fb579.ngrok-free.app
+VITE_OTP_BASE=https://408444805012.ngrok-free.app
 
-# OTP GraphQL Endpoints (automatically derived)
-VITE_OTP_TRANS_GQL=${VITE_OTP_BASE}/otp/transmodel/v3
+# OTP GraphQL Endpoint
 VITE_OTP_GTFS_GQL=${VITE_OTP_BASE}/otp/gtfs/v1
 ```
 

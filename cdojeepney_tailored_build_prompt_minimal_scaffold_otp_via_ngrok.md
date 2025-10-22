@@ -6,17 +6,13 @@
 
 ## 0) Environment — your current OTP endpoints
 
-- **Transmodel GraphQL (routing)**: `https://f390d61fb579.ngrok-free.app/otp/transmodel/v3`
-- **GTFS GraphQL (static index)**: `https://f390d61fb579.ngrok-free.app/otp/gtfs/v1`
-- **Actuator/Health** (optional): `https://f390d61fb579.ngrok-free.app/otp/actuators/health`
+- **GTFS GraphQL**: `https://408444805012.ngrok-free.app/otp/gtfs/v1`
 
 Create a project `.env` (Vite) as:
 
 ```env
-VITE_OTP_TM_URL=https://f390d61fb579.ngrok-free.app/otp/transmodel/v3
-VITE_OTP_GTFS_URL=https://f390d61fb579.ngrok-free.app/otp/gtfs/v1
-VITE_HEALTH_URL=https://f390d61fb579.ngrok-free.app/otp/actuators/health
-VITE_GEOCODER_URL=""  # optional; add Pelias/Photon later
+VITE_OTP_BASE=https://408444805012.ngrok-free.app
+VITE_OTP_GTFS_GQL=https://408444805012.ngrok-free.app/otp/gtfs/v1
 ```
 
 > If ngrok rotates, only update this file.

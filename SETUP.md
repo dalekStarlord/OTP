@@ -14,8 +14,7 @@ Create a `.env` file in the project root:
 
 ```bash
 # Copy and paste this into .env
-VITE_OTP_BASE=https://f390d61fb579.ngrok-free.app
-VITE_OTP_TRANS_GQL=${VITE_OTP_BASE}/otp/transmodel/v3
+VITE_OTP_BASE=https://408444805012.ngrok-free.app
 VITE_OTP_GTFS_GQL=${VITE_OTP_BASE}/otp/gtfs/v1
 ```
 
@@ -54,7 +53,7 @@ Expected: 3-6 route options appear at bottom
 ### "OTP Down" in health chip
 ```bash
 # Test endpoint directly
-curl -X POST https://f390d61fb579.ngrok-free.app/otp/transmodel/v3 \
+curl -X POST https://408444805012.ngrok-free.app/otp/gtfs/v1 \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ __typename }"}'
 ```

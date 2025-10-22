@@ -9,8 +9,7 @@
    
    Copy env.template to .env:
    
-   VITE_OTP_BASE=https://9776907978a6.ngrok-free.app
-   VITE_OTP_TRANS_GQL=${VITE_OTP_BASE}/otp/transmodel/v3
+   VITE_OTP_BASE=https://408444805012.ngrok-free.app
    VITE_OTP_GTFS_GQL=${VITE_OTP_BASE}/otp/gtfs/v1
 
 2. Install & Run:
@@ -25,7 +24,7 @@
 ✅ WHAT WAS BUILT
 ───────────────────────────────────────────────────────────────
 
-✓ Dual routing engines (Transmodel v3 + GTFS v1)
+✓ GTFS routing engine
 ✓ Smart location search with autocomplete
 ✓ Map-click location picking
 ✓ Interactive route visualization
