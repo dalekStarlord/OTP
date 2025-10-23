@@ -53,7 +53,7 @@ Expected: 3-6 route options appear at bottom
 ### "OTP Down" in health chip
 ```bash
 # Test endpoint directly
-curl -X POST https://408444805012.ngrok-free.app/otp/gtfs/v1 \
+curl -X POST https://67841b82a6c7.ngrok-free.app/otp/gtfs/v1 \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ __typename }"}'
 ```

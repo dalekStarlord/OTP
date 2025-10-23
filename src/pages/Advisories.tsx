@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getServiceAdvisories } from '../mocks/mockApi';
+import { getServiceAdvisories } from '../lib/api';
 import { useAppStore } from '../store/appStore';
 import type { ServiceAdvisory } from '../lib/enhanced-types';
 import { AlertCircle, AlertTriangle, Info, XCircle } from 'lucide-react';

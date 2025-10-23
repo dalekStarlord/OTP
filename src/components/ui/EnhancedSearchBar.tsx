@@ -9,7 +9,7 @@ import { Search, MapPin, X, Loader2, Navigation, Clock, Star, MapPinned } from '
 import { cn } from '../../lib/utils';
 import { useAppStore } from '../../store/appStore';
 import { usePlanStore } from '../../store/planStore';
-import { geocode } from '../../mocks/mockApi';
+import { geocode } from '../../lib/api';
 import type { GeocodeResult } from '../../lib/enhanced-types';
 import type { Coord } from '../../lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,7 +32,8 @@ export function EnhancedSearchBar({
 }: EnhancedSearchBarProps) {
   const { t } = useTranslation();
   const { recentSearches, savedPlaces, setStatus } = useAppStore();
-  const { setPickingMode } = usePlanStore();
+  const { pickingMode, setPickingMode } = usePlanStore();
+  const isPicking = pickingMode === type;
   const [query, setQuery] = useState(value?.name || '');
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,6 +72,14 @@ export function EnhancedSearchBar({
       setResults([]);
     }
   }, [query, focused]);
+
+  // Update input when value changes (e.g., from map pick)
+  useEffect(() => {
+    if (value?.name) {
+      console.log(`📍 ${type.toUpperCase()} location updated:`, value);
+      setQuery(value.name);
+    }
+  }, [value, type]);
 
   // Handle geolocation
   const handleUseLocation = () => {
@@ -120,8 +129,18 @@ export function EnhancedSearchBar({
   };
 
   const handleMapPick = () => {
-    setPickingMode(type);
-    setFocused(false);
+    const { pickingMode: currentMode } = usePlanStore.getState();
+    
+    if (currentMode === type) {
+      // Toggle off if already picking this field
+      console.log(`🔵 Deactivating picking mode for ${type}`);
+      setPickingMode(null);
+    } else {
+      // Activate picking mode for this field
+      console.log(`🔵 Activating picking mode for ${type}`);
+      setPickingMode(type);
+      setFocused(false);
+    }
   };
 
   // Keyboard navigation
@@ -160,11 +179,16 @@ export function EnhancedSearchBar({
         </label>
         <button
           onClick={handleMapPick}
-          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1"
-          title="Click on map to select location"
+          className={cn(
+            "text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all",
+            isPicking
+              ? "bg-blue-600 text-white font-semibold shadow-md"
+              : "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-700"
+          )}
+          title={isPicking ? "Click cancel or click on map" : "Click on map to select location"}
         >
           <MapPinned className="h-3 w-3" />
-          Pick on map
+          {isPicking ? 'Click on map...' : 'Pick on map'}
         </button>
       </div>
 

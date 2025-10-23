@@ -106,7 +106,14 @@ function ItineraryCard({ itinerary, isSelected, onHover, onSelect }: ItineraryCa
 
   return (
     <button
-      onClick={() => onSelect(itinerary.id)}
+      onClick={() => {
+        console.log('🔴 Route card clicked:', itinerary.id, {
+          duration: durationMin,
+          legs: itinerary.legs.length,
+          hasPolylines: itinerary.legs.every(leg => !!leg.polyline),
+        });
+        onSelect(itinerary.id);
+      }}
       onMouseEnter={() => onHover(itinerary.id)}
       onMouseLeave={() => onHover(null)}
       className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${

@@ -11,15 +11,16 @@ import { ModeToggleGroup } from '../components/ui/ModeToggle';
 import { RouteCard } from '../components/ui/RouteCard';
 import { Button } from '../components/ui/Button';
 import { MapLegend } from '../components/ui/MapLegend';
-import { planRoute } from '../mocks/mockApi';
+import { planTripGtfs } from '../lib/otp';
 import { SORT_OPTIONS } from '../lib/constants';
 import { ArrowLeftRight, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../lib/utils';
 import MapView from '../components/MapView';
 
 export function Home() {
   const { t } = useTranslation();
-  const { from, to, setFrom, setTo, itineraries, setItineraries, selectedItineraryId, setSelectedItineraryId } = usePlanStore();
+  const { from, to, setFrom, setTo, itineraries, setItineraries, selectedItineraryId, setSelectedItineraryId, pickingMode } = usePlanStore();
   const { filters, setFilters, setStatus, addToast, addRecentSearch } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredItineraryId, setHoveredItineraryId] = useState<string | null>(null);
@@ -36,12 +37,27 @@ export function Home() {
     setStatus({ computing: true });
     
     try {
-      const results = await planRoute(from, to, {
-        numItineraries: 5,
-        modes: Object.entries(filters.modes)
-          .filter(([_, state]) => state !== 'exclude')
-          .map(([mode]) => mode),
-      });
+      // Use real OTP API with GTFS endpoint
+      const results = await planTripGtfs(
+        from,
+        to,
+        new Date().toISOString(), // Current date/time
+        5 // Number of itineraries
+      );
+      
+      // Log first itinerary structure for debugging
+      if (results.length > 0) {
+        console.log('📦 First itinerary structure:', {
+          id: results[0].id,
+          legs: results[0].legs.map(leg => ({
+            mode: leg.mode,
+            hasPolyline: !!leg.polyline,
+            polylineLength: leg.polyline?.length || 0,
+            from: { lat: leg.from.lat, lon: leg.from.lon, name: leg.from.name },
+            to: { lat: leg.to.lat, lon: leg.to.lon, name: leg.to.name },
+          }))
+        });
+      }
 
       // Sort based on filter
       const sorted = [...results].sort((a, b) => {
@@ -94,13 +110,31 @@ export function Home() {
 
   return (
     <div className="h-screen w-full relative overflow-hidden bg-gray-50 dark:bg-gray-900">
-      {/* Map layer */}
-      <MapView hoveredItineraryId={hoveredItineraryId} />
+      {/* Picking mode indicator - Bottom right corner */}
+      {pickingMode && (
+        <div className="absolute bottom-24 right-4 z-50 pointer-events-none">
+          <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-2xl animate-in slide-in-from-bottom-5 duration-300">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">
+                📍 {pickingMode === 'from' ? 'Click map for start point' : 'Click map for destination'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Main content */}
-      <main id="main-content" className="relative z-10 h-full flex flex-col md:flex-row">
+      {/* Main content - NO z-index on main wrapper */}
+      <main id="main-content" className="h-full flex flex-col md:flex-row">
         {/* Left sidebar - Search & Controls */}
-        <div className="w-full md:w-96 bg-white dark:bg-gray-800 md:h-full overflow-y-auto shadow-xl flex flex-col">
+        <div 
+          className={cn(
+            "w-full md:w-96 md:h-full overflow-y-auto shadow-xl flex flex-col transition-all duration-300",
+            pickingMode
+              ? "bg-white/90 dark:bg-gray-800/90"
+              : "bg-white dark:bg-gray-800"
+          )}
+        >
           <div className="p-4 space-y-4 flex-1">
             {/* Search boxes */}
             <div className="relative space-y-3">
@@ -208,7 +242,10 @@ export function Home() {
                     key={itinerary.id}
                     itinerary={itinerary}
                     selected={selectedItineraryId === itinerary.id}
-                    onSelect={() => setSelectedItineraryId(itinerary.id)}
+                    onSelect={() => {
+                      console.log('🟢 Home: Setting selected itinerary ID:', itinerary.id);
+                      setSelectedItineraryId(itinerary.id);
+                    }}
                     onHover={(hover) => setHoveredItineraryId(hover ? itinerary.id : null)}
                   />
                 ))}
@@ -224,9 +261,14 @@ export function Home() {
           </div>
         </div>
 
-        {/* Map legend (desktop) */}
-        <div className="hidden md:block absolute bottom-4 right-4 z-20">
-          <MapLegend />
+        {/* Map area */}
+        <div className="flex-1 relative">
+          <MapView hoveredItineraryId={hoveredItineraryId} />
+          
+          {/* Map legend (desktop) */}
+          <div className="hidden md:block absolute bottom-4 right-4 z-20">
+            <MapLegend />
+          </div>
         </div>
       </main>
     </div>

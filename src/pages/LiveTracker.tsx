@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Icon } from 'leaflet';
-import { getLiveVehicles } from '../mocks/mockApi';
+import { getLiveVehicles } from '../lib/api';
 import { useAppStore } from '../store/appStore';
 import type { LiveVehicle } from '../lib/enhanced-types';
 import { CDO_CENTER } from '../lib/constants';

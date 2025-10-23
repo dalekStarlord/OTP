@@ -43,6 +43,11 @@ export function RouteCard({
   );
 
   const handleClick = () => {
+    console.log('💳 RouteCard clicked:', itinerary.id, {
+      legs: itinerary.legs.length,
+      duration: itinerary.duration,
+      hasPolylines: itinerary.legs.filter(l => l.polyline).length,
+    });
     if (onSelect) {
       onSelect();
     }

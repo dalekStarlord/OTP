@@ -3,6 +3,7 @@
  * Replace with real OTP/GTFS API calls in production
  */
 
+import polyline from '@mapbox/polyline';
 import { CDO_CENTER, CDO_LANDMARKS } from '../lib/constants';
 import type {
   GeocodeResult,
@@ -231,11 +232,28 @@ export function mockPlanRoute(
 
 /**
  * Generate simple mock polyline between two points
+ * Creates a simple straight line with some intermediate points for realism
  */
 function generateMockPolyline(from: Coord, to: Coord): string {
-  // Simple encoded polyline (in reality, would be properly encoded)
-  // This is a placeholder - real implementation would use @mapbox/polyline
-  return `mock_polyline_${from.lat}_${from.lon}_${to.lat}_${to.lon}`;
+  // Generate intermediate points for a more realistic route
+  const points: [number, number][] = [];
+  const steps = 5; // number of intermediate points
+  
+  for (let i = 0; i <= steps; i++) {
+    const ratio = i / steps;
+    const lat = from.lat + (to.lat - from.lat) * ratio;
+    const lon = from.lon + (to.lon - from.lon) * ratio;
+    
+    // Add slight random variation for realism (±0.0005 degrees ~= ±50 meters)
+    const variation = 0.0005;
+    const varLat = i === 0 || i === steps ? 0 : (Math.random() - 0.5) * variation;
+    const varLon = i === 0 || i === steps ? 0 : (Math.random() - 0.5) * variation;
+    
+    points.push([lat + varLat, lon + varLon]);
+  }
+  
+  // Encode with precision 5 (standard for Google/OTP)
+  return polyline.encode(points, 5);
 }
 
 /**
