@@ -5,14 +5,15 @@
 
 import { useTranslation } from 'react-i18next';
 import { Clock, DollarSign, ArrowRightLeft, ChevronDown, ChevronUp } from 'lucide-react';
-import { cn, formatDuration, formatFare, getModeColor, getModeIcon } from '../../lib/utils';
-import type { NormalizedItinerary } from '../../lib/types';
+import { cn, formatDuration, formatFare, getModeColor, getModeIcon, calculateTotalFare, calculateFareSavings } from '../../lib/utils';
+import type { NormalizedItinerary, FareType } from '../../lib/types';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import * as LucideIcons from 'lucide-react';
 
 interface RouteCardProps {
   itinerary: NormalizedItinerary;
+  fareType?: FareType;
   selected?: boolean;
   onSelect?: () => void;
   onHover?: (hover: boolean) => void;
@@ -21,6 +22,7 @@ interface RouteCardProps {
 
 export function RouteCard({
   itinerary,
+  fareType = 'regular',
   selected,
   onSelect,
   onHover,
@@ -29,14 +31,9 @@ export function RouteCard({
   const { t, i18n } = useTranslation();
   const [showDetails, setShowDetails] = useState(initialShowDetails);
 
-  // Calculate fare (mock - would come from API)
-  const fare = itinerary.legs.reduce((total, leg) => {
-    if (leg.mode === 'JEEPNEY') return total + 13;
-    if (leg.mode === 'BUS') return total + 15;
-    if (leg.mode === 'TRICYCLE') return total + 10;
-    if (leg.mode === 'FERRY') return total + 20;
-    return total;
-  }, 0);
+  // Calculate fare based on LTFRB matrix and fare type
+  const fare = calculateTotalFare(itinerary, fareType);
+  const savings = fareType === 'discount' ? calculateFareSavings(itinerary) : 0;
 
   const transitLegs = itinerary.legs.filter(leg => 
     ['JEEPNEY', 'BUS', 'TRICYCLE', 'FERRY', 'TRANSIT'].includes(leg.mode)
@@ -97,7 +94,14 @@ export function RouteCard({
               <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
                 {formatFare(fare)}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">{t('results.fare')}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {t('results.fare')}
+                {fareType === 'discount' && savings > 0 && (
+                  <span className="ml-1 text-green-600 dark:text-green-400 font-medium">
+                    (-{formatFare(savings)})
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

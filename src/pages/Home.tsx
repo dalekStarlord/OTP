@@ -20,7 +20,7 @@ import MapView from '../components/MapView';
 
 export function Home() {
   const { t } = useTranslation();
-  const { from, to, setFrom, setTo, itineraries, setItineraries, selectedItineraryId, setSelectedItineraryId, pickingMode } = usePlanStore();
+  const { from, to, setFrom, setTo, fareType, setFareType, itineraries, setItineraries, selectedItineraryId, setSelectedItineraryId, pickingMode } = usePlanStore();
   const { filters, setFilters, setStatus, addToast, addRecentSearch } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredItineraryId, setHoveredItineraryId] = useState<string | null>(null);
@@ -108,6 +108,13 @@ export function Home() {
     setTo(temp);
   };
 
+  const handleClear = () => {
+    setFrom(undefined);
+    setTo(undefined);
+    setItineraries(undefined);
+    setSelectedItineraryId(undefined);
+  };
+
   return (
     <div className="h-screen w-full relative overflow-hidden bg-gray-50 dark:bg-gray-900">
       {/* Picking mode indicator - Bottom right corner */}
@@ -145,16 +152,37 @@ export function Home() {
                 autoFocus
               />
 
-              {/* Swap button */}
-              <div className="flex justify-center">
+              {/* Swap and Clear buttons */}
+              <div className="flex justify-center items-center gap-2">
                 <button
                   onClick={handleSwap}
                   disabled={!from && !to}
-                  className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   aria-label={t('search.swap')}
                   title={t('search.swap')}
                 >
-                  <ArrowLeftRight className="h-5 w-5 text-gray-600" />
+                  <ArrowLeftRight className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                </button>
+                <button
+                  onClick={handleClear}
+                  disabled={!from && !to}
+                  className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Clear locations"
+                  title="Clear all locations"
+                >
+                  <svg 
+                    className="h-5 w-5 text-red-600 dark:text-red-400" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+                    />
+                  </svg>
                 </button>
               </div>
 
@@ -163,6 +191,46 @@ export function Home() {
                 value={to}
                 onChange={setTo}
               />
+            </div>
+
+            {/* Fare Type Selector */}
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-2 border-green-200 dark:border-green-700 rounded-lg p-3">
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">
+                💰 Fare Type
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="fareType"
+                    value="regular"
+                    checked={fareType === 'regular'}
+                    onChange={(e) => setFareType(e.target.value as 'regular' | 'discount')}
+                    className="w-4 h-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600">
+                    Regular Fare
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="fareType"
+                    value="discount"
+                    checked={fareType === 'discount'}
+                    onChange={(e) => setFareType(e.target.value as 'regular' | 'discount')}
+                    className="w-4 h-4 text-green-600 focus:ring-2 focus:ring-green-500"
+                  />
+                  <div className="flex-1 flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-green-600">
+                      Discounted (20% off)
+                    </span>
+                    <span className="text-[10px] text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                      Student/Senior/PWD
+                    </span>
+                  </div>
+                </label>
+              </div>
             </div>
 
             {/* Filters toggle */}
@@ -241,6 +309,7 @@ export function Home() {
                   <RouteCard
                     key={itinerary.id}
                     itinerary={itinerary}
+                    fareType={fareType}
                     selected={selectedItineraryId === itinerary.id}
                     onSelect={() => {
                       console.log('🟢 Home: Setting selected itinerary ID:', itinerary.id);

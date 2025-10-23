@@ -1,11 +1,12 @@
 import { create } from 'zustand';
-import type { AppState, Coord, NormalizedItinerary, NavigationState } from '../lib/types';
+import type { AppState, Coord, NormalizedItinerary, NavigationState, FareType } from '../lib/types';
 
 type PlanStore = AppState & {
   setFrom: (coord?: Coord) => void;
   setTo: (coord?: Coord) => void;
   setDateTime: (dateTime: string) => void;
   setNumItineraries: (num: number) => void;
+  setFareType: (fareType: FareType) => void;
   setItineraries: (itineraries?: NormalizedItinerary[]) => void;
   setSelectedItineraryId: (id?: string) => void;
   setPickingMode: (mode: 'from' | 'to' | null) => void;
@@ -33,6 +34,7 @@ const initialState: AppState = {
   to: undefined,
   dateTimeISO: new Date().toISOString(),
   numItineraries: 5,
+  fareType: 'regular',
   itineraries: undefined,
   selectedItineraryId: undefined,
   pickingMode: null,
@@ -47,6 +49,7 @@ export const usePlanStore = create<PlanStore>((set) => ({
   setTo: (coord) => set({ to: coord, error: undefined }),
   setDateTime: (dateTime) => set({ dateTimeISO: dateTime }),
   setNumItineraries: (num) => set({ numItineraries: num }),
+  setFareType: (fareType) => set({ fareType }),
   setItineraries: (itineraries) => set({ itineraries }),
   setSelectedItineraryId: (id) => set({ selectedItineraryId: id }),
   setPickingMode: (mode) => set({ pickingMode: mode }),

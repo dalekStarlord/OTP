@@ -6,6 +6,14 @@ export type Coord = {
   name?: string;
 };
 
+export type FareProduct = {
+  id: string;
+  price: {
+    amount: number;
+    currency: string;
+  };
+};
+
 export type NormalizedLeg = {
   mode: string;
   from: { lat: number; lon: number; name?: string };
@@ -14,6 +22,7 @@ export type NormalizedLeg = {
   duration: number; // seconds
   lineName?: string;
   polyline?: string; // encoded
+  fareProducts?: FareProduct[];
 };
 
 export type NormalizedItinerary = {
@@ -34,11 +43,14 @@ export type NavigationState = {
   speed: number; // meters per second
 };
 
+export type FareType = 'regular' | 'discount';
+
 export type AppState = {
   from?: Coord;
   to?: Coord;
   dateTimeISO: string;
   numItineraries: number;
+  fareType: FareType;
   itineraries?: NormalizedItinerary[];
   selectedItineraryId?: string;
   pickingMode?: 'from' | 'to' | null;

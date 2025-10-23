@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { NormalizedLeg, NormalizedItinerary, FareType } from './types';
 
 /**
  * Merge Tailwind CSS classes with clsx
@@ -163,5 +164,37 @@ export function loadFromStorage<T>(key: string): T | null {
     console.error(`Failed to load ${key} from localStorage`, error);
     return null;
   }
+}
+
+/**
+ * Get the display fare for a leg based on user's fare type selection
+ */
+export function getDisplayFare(leg: NormalizedLeg, fareType: FareType): number {
+  const fareProducts = leg.fareProducts || [];
+  
+  // Find the matching fare based on user selection
+  const selectedFare = fareProducts.find(fp => 
+    fp.id.endsWith(`_${fareType}`)
+  );
+  
+  return selectedFare?.price.amount || 0;
+}
+
+/**
+ * Calculate total fare for an itinerary based on fare type
+ */
+export function calculateTotalFare(itinerary: NormalizedItinerary, fareType: FareType): number {
+  return itinerary.legs
+    .filter(leg => leg.mode === 'BUS') // Only transit legs
+    .reduce((total, leg) => total + getDisplayFare(leg, fareType), 0);
+}
+
+/**
+ * Calculate fare savings when using discount fare
+ */
+export function calculateFareSavings(itinerary: NormalizedItinerary): number {
+  const regularFare = calculateTotalFare(itinerary, 'regular');
+  const discountFare = calculateTotalFare(itinerary, 'discount');
+  return regularFare - discountFare;
 }
 

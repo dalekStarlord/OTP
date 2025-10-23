@@ -49,6 +49,7 @@ const GTFS_PLAN_QUERY = /* GraphQL */ `
           route {
             shortName
             longName
+            gtfsId
           }
           legGeometry {
             points
@@ -102,27 +103,75 @@ export async function planTripGtfs(
   }
 }
 
+/**
+ * Calculate LTFRB-compliant fare based on distance
+ * First 4km: ₱13.00 regular / ₱10.50 discount
+ * Additional km: ₱1.80/km regular / ₱1.44/km discount
+ */
+function calculateFareProducts(distanceMeters: number, routeId: string): any[] {
+  if (distanceMeters === 0) return [];
+  
+  const distanceKm = distanceMeters / 1000;
+  const BASE_FARE_REGULAR = 13.00;
+  const BASE_FARE_DISCOUNT = 10.50;
+  const BASE_DISTANCE_KM = 4.0;
+  const RATE_PER_KM_REGULAR = 1.80;
+  const RATE_PER_KM_DISCOUNT = 1.44;
+  
+  let regularFare = BASE_FARE_REGULAR;
+  let discountFare = BASE_FARE_DISCOUNT;
+  
+  if (distanceKm > BASE_DISTANCE_KM) {
+    const extraKm = distanceKm - BASE_DISTANCE_KM;
+    regularFare += extraKm * RATE_PER_KM_REGULAR;
+    discountFare += extraKm * RATE_PER_KM_DISCOUNT;
+  }
+  
+  return [
+    {
+      id: `fare_${routeId}_regular`,
+      price: {
+        amount: Math.round(regularFare * 100) / 100, // Round to 2 decimals
+        currency: 'PHP'
+      }
+    },
+    {
+      id: `fare_${routeId}_discount`,
+      price: {
+        amount: Math.round(discountFare * 100) / 100, // Round to 2 decimals
+        currency: 'PHP'
+      }
+    }
+  ];
+}
+
 function normalizeGtfs(data: any): NormalizedItinerary[] {
   const itineraries = data?.plan?.itineraries || [];
   
   return itineraries.map((itinerary: any, idx: number) => {
-    const legs: NormalizedLeg[] = (itinerary.legs || []).map((leg: any) => ({
-      mode: leg.mode || 'UNKNOWN',
-      from: {
-        lat: leg.from?.lat || 0,
-        lon: leg.from?.lon || 0,
-        name: leg.from?.name,
-      },
-      to: {
-        lat: leg.to?.lat || 0,
-        lon: leg.to?.lon || 0,
-        name: leg.to?.name,
-      },
-      distance: leg.distance || 0,
-      duration: leg.duration || 0,
-      lineName: leg.route?.shortName || leg.route?.longName,
-      polyline: leg.legGeometry?.points,
-    }));
+    const legs: NormalizedLeg[] = (itinerary.legs || []).map((leg: any) => {
+      const routeId = leg.route?.gtfsId || leg.route?.shortName || 'unknown';
+      const isBus = leg.mode === 'BUS';
+      
+      return {
+        mode: leg.mode || 'UNKNOWN',
+        from: {
+          lat: leg.from?.lat || 0,
+          lon: leg.from?.lon || 0,
+          name: leg.from?.name,
+        },
+        to: {
+          lat: leg.to?.lat || 0,
+          lon: leg.to?.lon || 0,
+          name: leg.to?.name,
+        },
+        distance: leg.distance || 0,
+        duration: leg.duration || 0,
+        lineName: leg.route?.shortName || leg.route?.longName,
+        polyline: leg.legGeometry?.points,
+        fareProducts: isBus ? calculateFareProducts(leg.distance || 0, routeId) : [],
+      };
+    });
 
     // Count transfers as number of non-walk legs minus 1
     const transitLegs = legs.filter(leg => leg.mode !== 'WALK').length;

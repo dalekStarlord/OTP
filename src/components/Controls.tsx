@@ -7,8 +7,10 @@ export default function Controls() {
     to,
     dateTimeISO,
     numItineraries,
+    fareType,
     isLoading,
     setNumItineraries,
+    setFareType,
     setItineraries,
     setSelectedItineraryId,
     setLoading,
@@ -103,6 +105,43 @@ export default function Controls() {
           </summary>
           
           <div className="mt-2 space-y-2">
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                Fare Type
+              </label>
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="fareType"
+                    value="regular"
+                    checked={fareType === 'regular'}
+                    onChange={(e) => setFareType(e.target.value as 'regular' | 'discount')}
+                    className="w-3.5 h-3.5 text-blue-600 focus:ring-1 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-gray-700 group-hover:text-gray-900">
+                    Regular Fare
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="fareType"
+                    value="discount"
+                    checked={fareType === 'discount'}
+                    onChange={(e) => setFareType(e.target.value as 'regular' | 'discount')}
+                    className="w-3.5 h-3.5 text-blue-600 focus:ring-1 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-gray-700 group-hover:text-gray-900">
+                    Discounted (20% off)
+                  </span>
+                  <span className="text-[9px] text-gray-500">
+                    Student/Senior/PWD
+                  </span>
+                </label>
+              </div>
+            </div>
+
             <div>
               <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">
                 Routes

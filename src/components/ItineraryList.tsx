@@ -1,5 +1,6 @@
 import { usePlanStore } from '../store/planStore';
 import type { NormalizedItinerary } from '../lib/types';
+import { calculateTotalFare, calculateFareSavings, formatFare } from '../lib/utils';
 
 type ItineraryListProps = {
   onHover: (id: string | null) => void;
@@ -7,7 +8,7 @@ type ItineraryListProps = {
 };
 
 export default function ItineraryList({ onHover, onSelect }: ItineraryListProps) {
-  const { itineraries, selectedItineraryId, isLoading, error } = usePlanStore();
+  const { itineraries, selectedItineraryId, fareType, isLoading, error } = usePlanStore();
 
   if (error) {
     return (
@@ -70,6 +71,7 @@ export default function ItineraryList({ onHover, onSelect }: ItineraryListProps)
             <ItineraryCard
               key={itinerary.id}
               itinerary={itinerary}
+              fareType={fareType}
               isSelected={itinerary.id === selectedItineraryId}
               onHover={onHover}
               onSelect={onSelect}
@@ -83,12 +85,13 @@ export default function ItineraryList({ onHover, onSelect }: ItineraryListProps)
 
 type ItineraryCardProps = {
   itinerary: NormalizedItinerary;
+  fareType: 'regular' | 'discount';
   isSelected: boolean;
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
 };
 
-function ItineraryCard({ itinerary, isSelected, onHover, onSelect }: ItineraryCardProps) {
+function ItineraryCard({ itinerary, fareType, isSelected, onHover, onSelect }: ItineraryCardProps) {
   const durationMin = Math.round(itinerary.duration / 60);
   const startTime = new Date(itinerary.startTime).toLocaleTimeString('en-US', {
     hour: '2-digit',
@@ -103,6 +106,11 @@ function ItineraryCard({ itinerary, isSelected, onHover, onSelect }: ItineraryCa
   const distanceKm = (totalDistance / 1000).toFixed(1);
 
   const modes = itinerary.legs.map((leg) => leg.mode).filter((m, i, arr) => arr.indexOf(m) === i);
+  
+  // Calculate fares
+  const totalFare = calculateTotalFare(itinerary, fareType);
+  const hasTransit = itinerary.legs.some(leg => leg.mode === 'BUS');
+  const savings = fareType === 'discount' ? calculateFareSavings(itinerary) : 0;
 
   return (
     <button
@@ -158,11 +166,27 @@ function ItineraryCard({ itinerary, isSelected, onHover, onSelect }: ItineraryCa
               {itinerary.source}
             </span>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 mb-1.5">
             {modes.map((mode, idx) => (
               <ModeIcon key={idx} mode={mode} />
             ))}
           </div>
+          
+          {/* Fare display */}
+          {hasTransit && totalFare > 0 && (
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${
+                isSelected ? 'bg-blue-600 text-white' : 'bg-green-100 text-green-800'
+              }`}>
+                <span className="text-xs font-bold">{formatFare(totalFare)}</span>
+              </div>
+              {fareType === 'discount' && savings > 0 && (
+                <span className="text-[10px] text-green-600 font-medium">
+                  Save {formatFare(savings)}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Arrow indicator */}
