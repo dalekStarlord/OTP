@@ -170,31 +170,32 @@ export function EnhancedSearchBar({
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-1 sm:mb-1.5">
         <label
           htmlFor={`search-${type}`}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+          className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           {type === 'from' ? t('search.from') : t('search.to')}
         </label>
         <button
           onClick={handleMapPick}
           className={cn(
-            "text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all",
+            "text-[10px] sm:text-xs flex items-center gap-0.5 sm:gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 transition-all",
             isPicking
               ? "bg-blue-600 text-white font-semibold shadow-md"
               : "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-700"
           )}
           title={isPicking ? "Click cancel or click on map" : "Click on map to select location"}
         >
-          <MapPinned className="h-3 w-3" />
-          {isPicking ? 'Click on map...' : 'Pick on map'}
+          <MapPinned className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+          <span className="hidden sm:inline">{isPicking ? 'Click on map...' : 'Pick on map'}</span>
+          <span className="sm:hidden">{isPicking ? 'Cancel' : 'Map'}</span>
         </button>
       </div>
 
       <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-          <Search className="h-5 w-5" aria-hidden="true" />
+        <div className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <Search className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
         </div>
 
         <input
@@ -213,7 +214,7 @@ export function EnhancedSearchBar({
           autoFocus={autoFocus}
           autoComplete="off"
           className={cn(
-            'w-full pl-10 pr-20 py-3 border-2 rounded-lg',
+            'w-full pl-8 sm:pl-10 pr-16 sm:pr-20 py-2 sm:py-2.5 md:py-3 border-2 rounded-lg text-sm sm:text-base',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'transition-all',
             'dark:bg-gray-700 dark:text-white dark:border-gray-600',
@@ -228,8 +229,8 @@ export function EnhancedSearchBar({
           }
         />
 
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {loading && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
+        <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
+          {loading && <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-gray-400" />}
           
           {query && !loading && (
             <button
@@ -237,7 +238,7 @@ export function EnhancedSearchBar({
               className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
               aria-label={t('common.clear')}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
           )}
 
@@ -247,7 +248,7 @@ export function EnhancedSearchBar({
             aria-label={t('search.useCurrentLocation')}
             title={t('search.useCurrentLocation')}
           >
-            <Navigation className="h-4 w-4" />
+            <Navigation className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
         </div>
       </div>
@@ -263,13 +264,13 @@ export function EnhancedSearchBar({
             transition={{ duration: 0.15 }}
             id={`search-results-${type}`}
             role="listbox"
-            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 max-h-80 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 sm:mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 max-h-60 sm:max-h-80 overflow-y-auto"
           >
             {/* Recent searches */}
             {showSuggestions && relevantRecent.length > 0 && (
-              <div className="p-2 border-b border-gray-100 dark:border-gray-700">
-                <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <Clock className="h-3 w-3" />
+              <div className="p-1.5 sm:p-2 border-b border-gray-100 dark:border-gray-700">
+                <div className="px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1.5 sm:gap-2">
+                  <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   {t('search.recent')}
                 </div>
                 {relevantRecent.slice(0, 3).map((coord, index) => (
@@ -282,10 +283,10 @@ export function EnhancedSearchBar({
                       coord,
                       type: 'poi',
                     })}
-                    className="w-full px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded text-left flex items-center gap-3"
+                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded text-left flex items-center gap-2 sm:gap-3"
                   >
-                    <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="text-sm dark:text-gray-200">{coord.name}</span>
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm dark:text-gray-200 truncate">{coord.name}</span>
                   </button>
                 ))}
               </div>
@@ -293,9 +294,9 @@ export function EnhancedSearchBar({
 
             {/* Saved places */}
             {showSuggestions && savedPlaces.length > 0 && (
-              <div className="p-2 border-b border-gray-100 dark:border-gray-700">
-                <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <Star className="h-3 w-3" />
+              <div className="p-1.5 sm:p-2 border-b border-gray-100 dark:border-gray-700">
+                <div className="px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1.5 sm:gap-2">
+                  <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   {t('search.favorites')}
                 </div>
                 {savedPlaces.slice(0, 3).map((place) => (
@@ -308,12 +309,12 @@ export function EnhancedSearchBar({
                       coord: place.coord,
                       type: 'poi',
                     })}
-                    className="w-full px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded text-left flex items-center gap-3"
+                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded text-left flex items-center gap-2 sm:gap-3"
                   >
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    <div>
-                      <div className="text-sm font-medium dark:text-gray-200">{place.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{place.address}</div>
+                    <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs sm:text-sm font-medium dark:text-gray-200 truncate">{place.name}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{place.address}</div>
                     </div>
                   </button>
                 ))}
@@ -322,7 +323,7 @@ export function EnhancedSearchBar({
 
             {/* Search results */}
             {results.length > 0 && (
-              <div className="p-2">
+              <div className="p-1.5 sm:p-2">
                 {results.map((result, index) => (
                   <button
                     key={result.id}
@@ -331,21 +332,21 @@ export function EnhancedSearchBar({
                     aria-selected={selectedIndex === index}
                     onClick={() => handleSelect(result)}
                     className={cn(
-                      'w-full px-3 py-2 rounded text-left flex items-start gap-3',
+                      'w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded text-left flex items-start gap-2 sm:gap-3',
                       'transition-colors',
                       selectedIndex === index
                         ? 'bg-blue-100 dark:bg-blue-900'
                         : 'hover:bg-blue-50 dark:hover:bg-gray-700'
                     )}
                   >
-                    <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0" />
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 dark:text-gray-500 mt-0.5 sm:mt-1 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                         {result.name}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{result.address}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{result.address}</div>
                       {result.landmark && (
-                        <div className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                        <div className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 mt-0.5 truncate">
                           Near {result.landmark}
                         </div>
                       )}
@@ -357,7 +358,7 @@ export function EnhancedSearchBar({
 
             {/* No results */}
             {query && results.length === 0 && !loading && (
-              <div className="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">
+              <div className="p-4 sm:p-6 text-center text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
                 {t('search.noResults')}
               </div>
             )}

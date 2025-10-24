@@ -63,7 +63,7 @@ interface AppStore {
 }
 
 const defaultPreferences: UserPreferences = {
-  theme: 'auto',
+  theme: 'light',
   language: 'en',
   textSize: 'medium',
   highContrast: false,

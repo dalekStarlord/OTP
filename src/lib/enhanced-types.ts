@@ -6,7 +6,7 @@ import { Coord, NormalizedItinerary, NormalizedLeg } from './types';
 
 // User preferences
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
+  theme: 'light' | 'dark';
   language: 'en' | 'fil' | 'ceb';
   textSize: 'small' | 'medium' | 'large';
   highContrast: boolean;

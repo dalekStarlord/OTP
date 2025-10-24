@@ -43,10 +43,10 @@ const queryClient = new QueryClient({
 
 const navItems = [
   { to: '/', icon: HomeIcon, labelKey: 'nav.home' },
-  { to: '/live', icon: Radio, labelKey: 'nav.live' },
-  { to: '/favorites', icon: Star, labelKey: 'nav.favorites' },
-  { to: '/advisories', icon: AlertCircle, labelKey: 'nav.advisories' },
-  { to: '/contribute', icon: MessageSquarePlus, labelKey: 'nav.contribute' },
+  // { to: '/live', icon: Radio, labelKey: 'nav.live' },
+  // { to: '/favorites', icon: Star, labelKey: 'nav.favorites' },
+  // { to: '/advisories', icon: AlertCircle, labelKey: 'nav.advisories' },
+  // { to: '/contribute', icon: MessageSquarePlus, labelKey: 'nav.contribute' },
   { to: '/settings', icon: SettingsIcon, labelKey: 'nav.settings' },
 ];
 
@@ -59,16 +59,8 @@ export default function AppEnhanced() {
     
     if (preferences.theme === 'dark') {
       root.classList.add('dark');
-    } else if (preferences.theme === 'light') {
-      root.classList.remove('dark');
     } else {
-      // Auto: use system preference
-      const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      if (darkModeQuery.matches) {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
+      root.classList.remove('dark');
     }
 
     // Apply text size
@@ -219,7 +211,7 @@ function Navigation({ onNavigate }: { onNavigate?: () => void }) {
               )
             }
           >
-            {({ isActive }) => {
+            {() => {
               const IconComponent = item.icon;
               return (
                 <>

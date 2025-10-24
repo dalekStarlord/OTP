@@ -1,6 +1,6 @@
 /**
  * Real API implementations for geocoding, advisories, live tracking, etc.
- * Replaces mock API with actual service integrations
+ * All data comes from real services (Photon API for geocoding, OTP for routing)
  */
 
 import { geocodeSearch, GeocodeSuggestion } from './geocode';
@@ -29,14 +29,15 @@ export async function geocode(query: string): Promise<GeocodeResult[]> {
 
 /**
  * Reverse geocode (convert coordinates to address)
+ * Using Photon API for CORS-friendly requests
  */
 export async function reverseGeocode(coord: Coord): Promise<GeocodeResult | null> {
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${coord.lat}&lon=${coord.lon}&format=json`,
+      `https://photon.komoot.io/reverse?lat=${coord.lat}&lon=${coord.lon}`,
       {
         headers: {
-          'User-Agent': 'CDOJeepney/0.3.0',
+          'Accept': 'application/json',
         },
       }
     );
@@ -44,19 +45,40 @@ export async function reverseGeocode(coord: Coord): Promise<GeocodeResult | null
     if (!response.ok) return null;
 
     const data = await response.json();
+    const feature = data.features?.[0];
+    
+    if (!feature) return null;
+
+    const props = feature.properties;
+    const name = props.name || props.street || `Location (${coord.lat.toFixed(4)}, ${coord.lon.toFixed(4)})`;
+    const displayName = formatDisplayName(props);
 
     return {
       id: `reverse-${coord.lat}-${coord.lon}`,
-      name: data.name || data.display_name.split(',')[0],
-      address: data.display_name,
+      name,
+      address: displayName,
       coord,
-      type: determineType(data.display_name),
-      landmark: extractLandmark(data.display_name),
+      type: determineType(displayName),
+      landmark: extractLandmark(displayName),
     };
   } catch (error) {
     console.error('Reverse geocode error:', error);
     return null;
   }
+}
+
+/**
+ * Format Photon properties into display name
+ */
+function formatDisplayName(props: any): string {
+  const parts: string[] = [];
+  
+  if (props.name) parts.push(props.name);
+  if (props.street) parts.push(props.street);
+  if (props.city || props.county) parts.push(props.city || props.county);
+  if (props.state) parts.push(props.state);
+  
+  return parts.join(', ') || 'Unnamed location';
 }
 
 /**
