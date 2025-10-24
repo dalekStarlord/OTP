@@ -10,9 +10,12 @@ import type { NormalizedItinerary, FareType } from '../../lib/types';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import * as LucideIcons from 'lucide-react';
+import { usePlanStore } from '../../store/planStore';
+import { getRouteColor } from '../../lib/polyline';
 
 interface RouteCardProps {
   itinerary: NormalizedItinerary;
+  itineraryIndex: number; // Add index to determine route color
   fareType?: FareType;
   selected?: boolean;
   onSelect?: () => void;
@@ -22,6 +25,7 @@ interface RouteCardProps {
 
 export function RouteCard({
   itinerary,
+  itineraryIndex,
   fareType = 'regular',
   selected,
   onSelect,
@@ -30,6 +34,10 @@ export function RouteCard({
 }: RouteCardProps) {
   const { t, i18n } = useTranslation();
   const [showDetails, setShowDetails] = useState(initialShowDetails);
+  const { focusedLegIndex, setFocusedLegIndex } = usePlanStore();
+  
+  // Get unique color for this route
+  const routeColor = getRouteColor(itineraryIndex);
 
   // Calculate fare based on LTFRB matrix and fare type
   const fare = calculateTotalFare(itinerary, fareType);
@@ -45,8 +53,26 @@ export function RouteCard({
       duration: itinerary.duration,
       hasPolylines: itinerary.legs.filter(l => l.polyline).length,
     });
+    
+    // Clear focused leg to show full route
+    setFocusedLegIndex(null);
+    
     if (onSelect) {
       onSelect();
+    }
+  };
+
+  const handleLegClick = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card selection when clicking step
+    // Toggle: if clicking the same leg, unfocus it and show full route
+    if (focusedLegIndex === index) {
+      setFocusedLegIndex(null);
+    } else {
+      setFocusedLegIndex(index);
+      // Auto-select this itinerary if not already selected
+      if (!selected && onSelect) {
+        onSelect();
+      }
     }
   };
 
@@ -63,11 +89,15 @@ export function RouteCard({
       onHoverStart={() => onHover?.(true)}
       onHoverEnd={() => onHover?.(false)}
       className={cn(
-        'bg-white dark:bg-gray-800 rounded-lg shadow-sm border transition-all cursor-pointer overflow-hidden',
+        'bg-white dark:bg-gray-800 rounded-lg shadow-sm border transition-all cursor-pointer overflow-hidden relative',
         selected
-          ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-1'
-          : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:shadow-md'
+          ? 'ring-2 ring-offset-1'
+          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 hover:shadow-md'
       )}
+      style={{
+        borderColor: selected ? routeColor : undefined,
+        ringColor: selected ? routeColor : undefined,
+      }}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -80,7 +110,13 @@ export function RouteCard({
       aria-label={`Route option: ${formatDuration(itinerary.duration, i18n.language)}, ${formatFare(fare)}`}
       aria-pressed={selected}
     >
-      <div className="p-3">
+      {/* Route color indicator bar */}
+      <div 
+        className="absolute left-0 top-0 bottom-0 w-1"
+        style={{ backgroundColor: routeColor }}
+      />
+      
+      <div className="p-3 pl-4">
         {/* Mobile-optimized layout (Sakay style) */}
         <div className="lg:hidden space-y-3">
           {/* Mode icons row */}
@@ -291,16 +327,31 @@ export function RouteCard({
             className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3"
           >
             {itinerary.legs.map((leg, index) => (
-              <div key={index} className="flex gap-2 sm:gap-3">
+              <button
+                key={index}
+                onClick={(e) => handleLegClick(index, e)}
+                className={cn(
+                  'flex gap-2 sm:gap-3 w-full text-left p-2 rounded-lg transition-all duration-200',
+                  'hover:bg-gray-50 dark:hover:bg-gray-700/50 active:scale-98',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+                  'min-h-[44px]', // Ensure touch-friendly size
+                  selected && focusedLegIndex === index
+                    ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500 shadow-sm'
+                    : ''
+                )}
+                aria-label={`View step ${index + 1}: ${leg.mode === 'WALK' ? 'Walk' : leg.lineName || leg.mode} from ${leg.from.name} to ${leg.to.name}`}
+                aria-pressed={selected && focusedLegIndex === index}
+              >
                 <div className="flex flex-col items-center flex-shrink-0">
                   <div className={cn(
-                    'w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center',
-                    getModeColor(leg.mode)
+                    'w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform',
+                    getModeColor(leg.mode),
+                    selected && focusedLegIndex === index && 'scale-110 ring-2 ring-white dark:ring-gray-900'
                   )}>
                     <span className="text-[10px] sm:text-xs font-bold">{index + 1}</span>
                   </div>
                   {index < itinerary.legs.length - 1 && (
-                    <div className="w-0.5 flex-1 bg-gray-300 my-1 min-h-[16px]" />
+                    <div className="w-0.5 flex-1 bg-gray-300 dark:bg-gray-600 my-1 min-h-[16px]" />
                   )}
                 </div>
 
@@ -316,8 +367,13 @@ export function RouteCard({
                   <div className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-500 mt-0.5 sm:mt-1">
                     {formatDuration(leg.duration, i18n.language)} • {(leg.distance / 1000).toFixed(1)} km
                   </div>
+                  {selected && focusedLegIndex === index && (
+                    <div className="text-[9px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
+                      🔍 Showing on map
+                    </div>
+                  )}
                 </div>
-              </div>
+              </button>
             ))}
           </motion.div>
         )}

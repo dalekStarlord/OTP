@@ -19,7 +19,7 @@ import MapView from '../components/MapView';
 
 export function Home() {
   const { t } = useTranslation();
-  const { from, to, setFrom, setTo, fareType, setFareType, itineraries, setItineraries, selectedItineraryId, setSelectedItineraryId, pickingMode } = usePlanStore();
+  const { from, to, setFrom, setTo, fareType, setFareType, itineraries, setItineraries, selectedItineraryId, setSelectedItineraryId, pickingMode, clear } = usePlanStore();
   const { filters, setFilters, setStatus, addToast, addRecentSearch } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredItineraryId, setHoveredItineraryId] = useState<string | null>(null);
@@ -108,10 +108,10 @@ export function Home() {
   };
 
   const handleClear = () => {
-    setFrom(undefined);
-    setTo(undefined);
-    setItineraries(undefined);
-    setSelectedItineraryId(undefined);
+    console.log('🗑️ Clearing all locations and routes...');
+    // Use the store's clear function which resets everything
+    clear();
+    console.log('✅ Cleared - from:', undefined, 'to:', undefined);
   };
 
   return (
@@ -376,10 +376,11 @@ export function Home() {
 
               {/* Route Cards */}
               <div className="space-y-3">
-                {itineraries.map((itinerary) => (
+                {itineraries.map((itinerary, index) => (
                   <RouteCard
                     key={itinerary.id}
                     itinerary={itinerary}
+                    itineraryIndex={index}
                     fareType={fareType}
                     selected={selectedItineraryId === itinerary.id}
                     onSelect={() => {
@@ -559,10 +560,11 @@ export function Home() {
                   {itineraries.length} {t('results.title')}
                 </h2>
                 
-                {itineraries.map((itinerary) => (
+                {itineraries.map((itinerary, index) => (
                   <RouteCard
                     key={itinerary.id}
                     itinerary={itinerary}
+                    itineraryIndex={index}
                     fareType={fareType}
                     selected={selectedItineraryId === itinerary.id}
                     onSelect={() => {

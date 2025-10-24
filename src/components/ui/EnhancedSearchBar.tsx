@@ -73,11 +73,15 @@ export function EnhancedSearchBar({
     }
   }, [query, focused]);
 
-  // Update input when value changes (e.g., from map pick)
+  // Update input when value changes (e.g., from map pick or clear)
   useEffect(() => {
     if (value?.name) {
       console.log(`📍 ${type.toUpperCase()} location updated:`, value);
       setQuery(value.name);
+    } else if (value === undefined) {
+      // Clear the input when value is cleared
+      console.log(`🗑️ ${type.toUpperCase()} location cleared`);
+      setQuery('');
     }
   }, [value, type]);
 

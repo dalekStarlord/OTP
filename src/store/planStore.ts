@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { AppState, Coord, NormalizedItinerary, NavigationState, FareType } from '../lib/types';
 
 type PlanStore = AppState & {
+  focusedLegIndex: number | null;
   setFrom: (coord?: Coord) => void;
   setTo: (coord?: Coord) => void;
   setDateTime: (dateTime: string) => void;
@@ -9,6 +10,7 @@ type PlanStore = AppState & {
   setFareType: (fareType: FareType) => void;
   setItineraries: (itineraries?: NormalizedItinerary[]) => void;
   setSelectedItineraryId: (id?: string) => void;
+  setFocusedLegIndex: (index: number | null) => void;
   setPickingMode: (mode: 'from' | 'to' | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error?: string) => void;
@@ -45,13 +47,15 @@ const initialState: AppState = {
 
 export const usePlanStore = create<PlanStore>((set) => ({
   ...initialState,
+  focusedLegIndex: null,
   setFrom: (coord) => set({ from: coord, error: undefined }),
   setTo: (coord) => set({ to: coord, error: undefined }),
   setDateTime: (dateTime) => set({ dateTimeISO: dateTime }),
   setNumItineraries: (num) => set({ numItineraries: num }),
   setFareType: (fareType) => set({ fareType }),
   setItineraries: (itineraries) => set({ itineraries }),
-  setSelectedItineraryId: (id) => set({ selectedItineraryId: id }),
+  setSelectedItineraryId: (id) => set({ selectedItineraryId: id, focusedLegIndex: null }),
+  setFocusedLegIndex: (index) => set({ focusedLegIndex: index }),
   setPickingMode: (mode) => set({ pickingMode: mode }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
@@ -88,6 +92,7 @@ export const usePlanStore = create<PlanStore>((set) => ({
       to: undefined,
       itineraries: undefined,
       selectedItineraryId: undefined,
+      focusedLegIndex: null,
       error: undefined,
       pickingMode: null,
       navigation: initialNavigationState,

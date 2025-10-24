@@ -56,9 +56,33 @@ export function decodePolyline(encoded?: string | null): LatLngTuple[] {
 }
 
 /**
- * Get the style configuration for a leg based on its mode
+ * Predefined color palette for different route options
+ * Each route gets a unique color for easy visual distinction
  */
-export function getLegStyle(mode: string): {
+const ROUTE_COLORS = [
+  '#3b82f6', // blue-500
+  '#10b981', // green-500
+  '#f59e0b', // amber-500
+  '#8b5cf6', // violet-500
+  '#ec4899', // pink-500
+  '#06b6d4', // cyan-500
+  '#f97316', // orange-500
+  '#a855f7', // purple-500
+  '#14b8a6', // teal-500
+  '#ef4444', // red-500
+];
+
+/**
+ * Get a unique color for a route based on its index
+ */
+export function getRouteColor(index: number): string {
+  return ROUTE_COLORS[index % ROUTE_COLORS.length];
+}
+
+/**
+ * Get the style configuration for a leg with uniform route color
+ */
+export function getLegStyle(mode: string, routeColor: string): {
   color: string;
   weight: number;
   opacity: number;
@@ -68,25 +92,25 @@ export function getLegStyle(mode: string): {
   
   if (upperMode === 'WALK' || upperMode === 'FOOT') {
     return {
-      color: '#888888',
+      color: '#888888', // Walking legs remain gray
       weight: 4,
       opacity: 0.6,
       dashArray: '8, 8',
     };
   }
   
-  // BUS, TRANSIT, etc. - Make it bolder and more visible
+  // All transit legs use the same route color
   return {
-    color: '#ef4444', // red-500 - more visible than blue
+    color: routeColor,
     weight: 5,
     opacity: 0.85,
   };
 }
 
 /**
- * Get highlighted style for selected/hovered itinerary
+ * Get highlighted style for selected/hovered itinerary with uniform color
  */
-export function getHighlightedLegStyle(mode: string): {
+export function getHighlightedLegStyle(mode: string, routeColor: string): {
   color: string;
   weight: number;
   opacity: number;
@@ -103,9 +127,9 @@ export function getHighlightedLegStyle(mode: string): {
     };
   }
   
-  // Make selected route very visible
+  // Make selected route very visible with the route color
   return {
-    color: '#dc2626', // red-600 - darker red for emphasis
+    color: routeColor,
     weight: 7,
     opacity: 1,
   };

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { usePlanStore } from '../store/planStore';
-import { decodePolyline, getLegStyle, getHighlightedLegStyle } from '../lib/polyline';
+import { decodePolyline, getLegStyle, getHighlightedLegStyle, getRouteColor } from '../lib/polyline';
 import type { NormalizedItinerary } from '../lib/types';
 
 // Fix Leaflet default marker icons
@@ -40,7 +40,7 @@ type MapViewProps = {
 };
 
 export default function MapView({ hoveredItineraryId }: MapViewProps) {
-  const { from, to, itineraries, selectedItineraryId, navigation } = usePlanStore();
+  const { from, to, itineraries, selectedItineraryId, navigation, focusedLegIndex } = usePlanStore();
 
   // Calculate user position based on navigation state
   const userPosition = React.useMemo(() => {
@@ -78,10 +78,11 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
         
         <MapClickHandler />
         <MapBoundsHandler />
+        <LegFocusHandler />
         <NavigationSimulator />
         
         {/* Render polylines ONLY for selected itinerary */}
-        {itineraries?.map((itinerary) => {
+        {itineraries?.map((itinerary, index) => {
           const isSelected = itinerary.id === selectedItineraryId;
           const isHovered = itinerary.id === hoveredItineraryId;
           
@@ -94,7 +95,9 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
             <ItineraryPolylines
               key={itinerary.id}
               itinerary={itinerary}
+              itineraryIndex={index}
               highlight={shouldHighlight}
+              focusedLegIndex={isSelected ? focusedLegIndex : null}
             />
           );
         })}
@@ -158,6 +161,66 @@ function MapClickHandler() {
       }
     },
   });
+
+  return null;
+}
+
+// Component to focus map on a specific leg when clicked
+function LegFocusHandler() {
+  const map = useMap();
+  const { selectedItineraryId, itineraries, focusedLegIndex } = usePlanStore();
+
+  useEffect(() => {
+    if (focusedLegIndex === null || !selectedItineraryId || !itineraries) {
+      return;
+    }
+
+    const selectedItinerary = itineraries.find(it => it.id === selectedItineraryId);
+    if (!selectedItinerary) return;
+
+    const focusedLeg = selectedItinerary.legs[focusedLegIndex];
+    if (!focusedLeg) return;
+
+    // If leg has polyline, use it for bounds
+    if (focusedLeg.polyline) {
+      const coords = decodePolyline(focusedLeg.polyline);
+      if (coords.length > 0) {
+        // Filter out any invalid coordinates
+        const validCoords = coords.filter(c => 
+          c && 
+          typeof c.lat === 'number' && 
+          typeof c.lon === 'number' && 
+          !isNaN(c.lat) && 
+          !isNaN(c.lon)
+        );
+        
+        if (validCoords.length > 0) {
+          const bounds = L.latLngBounds(validCoords.map(c => [c.lat, c.lon]));
+          map.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 16,
+            animate: true,
+            duration: 0.5
+          });
+          return;
+        }
+      }
+    }
+
+    // Fallback: use from/to coordinates
+    if (focusedLeg.from?.lat && focusedLeg.from?.lon && focusedLeg.to?.lat && focusedLeg.to?.lon) {
+      const bounds = L.latLngBounds([
+        [focusedLeg.from.lat, focusedLeg.from.lon],
+        [focusedLeg.to.lat, focusedLeg.to.lon]
+      ]);
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 16,
+        animate: true,
+        duration: 0.5
+      });
+    }
+  }, [map, selectedItineraryId, itineraries, focusedLegIndex]);
 
   return null;
 }
@@ -335,23 +398,34 @@ function NavigationSimulator() {
 // Component to render polylines for an itinerary
 type ItineraryPolylinesProps = {
   itinerary: NormalizedItinerary;
+  itineraryIndex: number;
   highlight: boolean;
+  focusedLegIndex: number | null;
 };
 
-function ItineraryPolylines({ itinerary, highlight }: ItineraryPolylinesProps) {
+function ItineraryPolylines({ itinerary, itineraryIndex, highlight, focusedLegIndex }: ItineraryPolylinesProps) {
   const { navigation, selectedItineraryId } = usePlanStore();
   const isNavigating = navigation.isNavigating && itinerary.id === selectedItineraryId;
+  
+  // Get unique color for this route
+  const routeColor = getRouteColor(itineraryIndex);
 
   // Debug logging
   console.log('🗺️ Rendering polylines for itinerary:', itinerary.id, {
     highlight,
     isNavigating,
     legCount: itinerary.legs.length,
+    routeColor,
   });
 
   return (
     <>
       {itinerary.legs.map((leg, idx) => {
+        // If a leg is focused, only render that specific leg
+        if (focusedLegIndex !== null && focusedLegIndex !== idx) {
+          return null; // Hide all other legs when one is focused
+        }
+
         if (!leg.polyline) {
           console.warn(`⚠️ Leg ${idx} of itinerary ${itinerary.id} has no polyline data`);
           return null;
@@ -363,6 +437,7 @@ function ItineraryPolylines({ itinerary, highlight }: ItineraryPolylinesProps) {
           decodedCoords: coords.length,
           firstCoord: coords[0],
           lastCoord: coords[coords.length - 1],
+          isFocused: focusedLegIndex === idx,
         });
         
         if (coords.length === 0) {
@@ -370,9 +445,15 @@ function ItineraryPolylines({ itinerary, highlight }: ItineraryPolylinesProps) {
           return null;
         }
 
-        const baseStyle = highlight
-          ? getHighlightedLegStyle(leg.mode)
-          : getLegStyle(leg.mode);
+        // Determine if this specific leg is focused
+        const isFocused = focusedLegIndex === idx;
+        
+        // Build style based on focus and highlight state
+        const baseStyle = isFocused
+          ? { ...getHighlightedLegStyle(leg.mode, routeColor), weight: 8, opacity: 1 } // Extra prominent for focused leg
+          : highlight
+          ? getHighlightedLegStyle(leg.mode, routeColor)
+          : getLegStyle(leg.mode, routeColor);
 
         // If navigating, show consumed path effect
         if (isNavigating) {
