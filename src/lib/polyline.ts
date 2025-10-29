@@ -47,12 +47,41 @@ export function decodePolyline(encoded?: string | null): LatLngTuple[] {
       }
     }
     
-    return decoded as LatLngTuple[];
+    // Remove consecutive duplicate points that can cause rendering issues
+    const cleaned = removeDuplicatePoints(decoded as LatLngTuple[]);
+    
+    return cleaned;
   } catch (error) {
-    console.error('❌ Failed to decode polyline:', error);
+    console.error('Failed to decode polyline:', error);
     console.error('Encoded string (first 100 chars):', encoded?.substring(0, 100));
     return [];
   }
+}
+
+/**
+ * Remove consecutive duplicate points from a polyline
+ * This prevents visual artifacts and ensures clean connections
+ */
+function removeDuplicatePoints(coords: LatLngTuple[]): LatLngTuple[] {
+  if (coords.length <= 1) return coords;
+  
+  const cleaned: LatLngTuple[] = [coords[0]];
+  const threshold = 0.00001; // ~1 meter tolerance
+  
+  for (let i = 1; i < coords.length; i++) {
+    const [prevLat, prevLon] = cleaned[cleaned.length - 1];
+    const [currLat, currLon] = coords[i];
+    
+    // Only add if point is different enough from previous
+    const latDiff = Math.abs(currLat - prevLat);
+    const lonDiff = Math.abs(currLon - prevLon);
+    
+    if (latDiff > threshold || lonDiff > threshold) {
+      cleaned.push(coords[i]);
+    }
+  }
+  
+  return cleaned;
 }
 
 /**

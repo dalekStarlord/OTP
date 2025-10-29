@@ -123,6 +123,8 @@ export function EnhancedSearchBar({
     setQuery(result.name);
     setFocused(false);
     setSelectedIndex(-1);
+    // Stop picking mode after selecting a result
+    setPickingMode(null);
   };
 
   const handleClear = () => {
@@ -130,6 +132,8 @@ export function EnhancedSearchBar({
     setQuery('');
     setResults([]);
     inputRef.current?.focus();
+    // Keep picking mode for this field so user can pick on map after clearing
+    setPickingMode(type);
   };
 
   const handleMapPick = () => {
@@ -174,32 +178,19 @@ export function EnhancedSearchBar({
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+      <div className="flex items-center justify-between mb-0.5 sm:mb-1.5">
         <label
           htmlFor={`search-${type}`}
-          className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200"
+          className="block text-[11px] sm:text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           {type === 'from' ? t('search.from') : t('search.to')}
         </label>
-        <button
-          onClick={handleMapPick}
-          className={cn(
-            "text-[10px] sm:text-xs flex items-center gap-0.5 sm:gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 transition-all",
-            isPicking
-              ? "bg-blue-600 text-white font-semibold shadow-md"
-              : "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-700"
-          )}
-          title={isPicking ? "Click cancel or click on map" : "Click on map to select location"}
-        >
-          <MapPinned className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-          <span className="hidden sm:inline">{isPicking ? 'Click on map...' : 'Pick on map'}</span>
-          <span className="sm:hidden">{isPicking ? 'Cancel' : 'Map'}</span>
-        </button>
+        {/* Map pick button removed intentionally; picking is auto-enabled on focus/click */}
       </div>
 
       <div className="relative">
         <div className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
-          <Search className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+          <Search className="h-3.5 w-3.5 sm:h-5 sm:w-5" aria-hidden="true" />
         </div>
 
         <input
@@ -207,8 +198,22 @@ export function EnhancedSearchBar({
           id={`search-${type}`}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setFocused(true)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            // If the user starts typing, disable map picking to avoid confusion
+            if (e.target.value.length > 0 && pickingMode) {
+              setPickingMode(null);
+            }
+          }}
+          onFocus={() => {
+            setFocused(true);
+            // Auto-enable map picking for this field when focused
+            setPickingMode(type);
+          }}
+          onClick={() => {
+            // Ensure picking mode is active on click
+            setPickingMode(type);
+          }}
           onBlur={() => {
             // Delay to allow click on results
             setTimeout(() => setFocused(false), 200);
@@ -218,7 +223,7 @@ export function EnhancedSearchBar({
           autoFocus={autoFocus}
           autoComplete="off"
           className={cn(
-            'w-full pl-8 sm:pl-10 pr-16 sm:pr-20 py-2 sm:py-2.5 md:py-3 border-2 rounded-lg text-sm sm:text-base',
+            'w-full pl-7 sm:pl-10 pr-14 sm:pr-20 py-1.5 sm:py-2.5 md:py-3 border sm:border-2 rounded-md sm:rounded-lg text-[13px] sm:text-base',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'transition-all',
             'dark:bg-gray-700 dark:text-white dark:border-gray-600',
@@ -234,7 +239,7 @@ export function EnhancedSearchBar({
         />
 
         <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
-          {loading && <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-gray-400" />}
+          {loading && <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-gray-400" />}
           
           {query && !loading && (
             <button
@@ -242,7 +247,7 @@ export function EnhancedSearchBar({
               className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
               aria-label={t('common.clear')}
             >
-              <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <X className="h-3 w-3 sm:h-4 sm:w-4" />
             </button>
           )}
 
