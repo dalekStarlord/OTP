@@ -4,13 +4,11 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { Clock, DollarSign, ArrowRightLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, ArrowRightLeft } from 'lucide-react';
 import { cn, formatDuration, formatFare, getModeColor, getModeIcon, calculateTotalFare, calculateFareSavings } from '../../lib/utils';
 import type { NormalizedItinerary, FareType } from '../../lib/types';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import * as LucideIcons from 'lucide-react';
-import { usePlanStore } from '../../store/planStore';
 import { getRouteColor } from '../../lib/polyline';
 
 interface RouteCardProps {
@@ -20,7 +18,6 @@ interface RouteCardProps {
   selected?: boolean;
   onSelect?: () => void;
   onHover?: (hover: boolean) => void;
-  showDetails?: boolean;
 }
 
 export function RouteCard({
@@ -30,11 +27,8 @@ export function RouteCard({
   selected,
   onSelect,
   onHover,
-  showDetails: initialShowDetails = false,
 }: RouteCardProps) {
   const { t, i18n } = useTranslation();
-  const [showDetails, setShowDetails] = useState(initialShowDetails);
-  const { focusedLegIndex, setFocusedLegIndex } = usePlanStore();
   
   // Get unique color for this route
   const routeColor = getRouteColor(itineraryIndex);
@@ -48,31 +42,8 @@ export function RouteCard({
   );
 
   const handleClick = () => {
-    console.log('💳 RouteCard clicked:', itinerary.id, {
-      legs: itinerary.legs.length,
-      duration: itinerary.duration,
-      hasPolylines: itinerary.legs.filter(l => l.polyline).length,
-    });
-    
-    // Clear focused leg to show full route
-    setFocusedLegIndex(null);
-    
     if (onSelect) {
       onSelect();
-    }
-  };
-
-  const handleLegClick = (index: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card selection when clicking step
-    // Toggle: if clicking the same leg, unfocus it and show full route
-    if (focusedLegIndex === index) {
-      setFocusedLegIndex(null);
-    } else {
-      setFocusedLegIndex(index);
-      // Auto-select this itinerary if not already selected
-      if (!selected && onSelect) {
-        onSelect();
-      }
     }
   };
 
@@ -107,7 +78,7 @@ export function RouteCard({
           handleClick();
         }
       }}
-      aria-label={`Route option: ${formatDuration(itinerary.duration, i18n.language)}, ${formatFare(fare)}`}
+      aria-label={`Route option: ${formatDuration(itinerary.duration, i18n.language)}, ₱${formatFare(fare)}`}
       aria-pressed={selected}
     >
       {/* Route color indicator bar */}
@@ -135,6 +106,11 @@ export function RouteCard({
                 'TRANSIT': 'bg-indigo-500',
               };
               
+              // Display priority: vehicleName > lineName > mode
+              const displayName = leg.mode === 'WALK'
+                ? 'Walk'
+                : (leg.vehicleName || leg.lineName?.split('-')[0] || leg.mode.slice(0, 4));
+              
               return (
                 <div key={index} className="flex flex-col items-center gap-1">
                   <div className={cn(
@@ -144,7 +120,7 @@ export function RouteCard({
                     <IconComponent className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <span className="text-[9px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                    {leg.lineName?.split('-')[0] || leg.mode.slice(0, 4)}
+                    {displayName}
                   </span>
                 </div>
               );
@@ -206,13 +182,12 @@ export function RouteCard({
           {/* Bottom row: Fare and Walking info */}
           <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-2">
             <div className="flex items-center gap-1">
-              <DollarSign className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                {formatFare(fare)}
+                ₱{formatFare(fare)}
               </span>
               {fareType === 'discount' && savings > 0 && (
                 <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                  (-{formatFare(savings)})
+                  (-₱{formatFare(savings)})
                 </span>
               )}
             </div>
@@ -243,13 +218,13 @@ export function RouteCard({
           <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 justify-end">
             <div className="text-right min-w-0">
               <div className="font-bold text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-100 truncate">
-                {formatFare(fare)}
+                ₱{formatFare(fare)}
               </div>
               <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
                 {t('results.fare')}
                 {fareType === 'discount' && savings > 0 && (
                   <span className="ml-1 text-green-600 dark:text-green-400 font-medium">
-                    (-{formatFare(savings)})
+                    (-₱{formatFare(savings)})
                   </span>
                 )}
               </div>
@@ -282,6 +257,11 @@ export function RouteCard({
               getModeIcon(leg.mode).slice(1)
             ] || LucideIcons.Circle;
             
+            // Display priority: vehicleName > lineName > mode
+            const displayName = leg.mode === 'WALK'
+              ? 'Walk'
+              : (leg.vehicleName || leg.lineName || t(`modes.${leg.mode.toLowerCase()}`));
+            
             return (
               <div
                 key={index}
@@ -291,92 +271,12 @@ export function RouteCard({
                 )}
               >
                 <IconComponent className="h-2.5 w-2.5 sm:h-3 sm:w-3" aria-hidden="true" />
-                <span className="truncate max-w-[120px] sm:max-w-none">{leg.lineName || t(`modes.${leg.mode.toLowerCase()}`)}</span>
+                <span className="truncate max-w-[120px] sm:max-w-none">{displayName}</span>
               </div>
             );
           })}
         </div>
 
-        {/* Expand/collapse button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowDetails(!showDetails);
-          }}
-          className="mt-2 sm:mt-3 text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-        >
-          {showDetails ? (
-            <>
-              <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" />
-              {t('results.hideSteps')}
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
-              {t('results.viewSteps')}
-            </>
-          )}
-        </button>
-
-        {/* Detailed steps */}
-        {showDetails && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3"
-          >
-            {itinerary.legs.map((leg, index) => (
-              <button
-                key={index}
-                onClick={(e) => handleLegClick(index, e)}
-                className={cn(
-                  'flex gap-2 sm:gap-3 w-full text-left p-2 rounded-lg transition-all duration-200',
-                  'hover:bg-gray-50 dark:hover:bg-gray-700/50 active:scale-98',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
-                  'min-h-[44px]', // Ensure touch-friendly size
-                  selected && focusedLegIndex === index
-                    ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500 shadow-sm'
-                    : ''
-                )}
-                aria-label={`View step ${index + 1}: ${leg.mode === 'WALK' ? 'Walk' : leg.lineName || leg.mode} from ${leg.from.name} to ${leg.to.name}`}
-                aria-pressed={selected && focusedLegIndex === index}
-              >
-                <div className="flex flex-col items-center flex-shrink-0">
-                  <div className={cn(
-                    'w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform',
-                    getModeColor(leg.mode),
-                    selected && focusedLegIndex === index && 'scale-110 ring-2 ring-white dark:ring-gray-900'
-                  )}>
-                    <span className="text-[10px] sm:text-xs font-bold">{index + 1}</span>
-                  </div>
-                  {index < itinerary.legs.length - 1 && (
-                    <div className="w-0.5 flex-1 bg-gray-300 dark:bg-gray-600 my-1 min-h-[16px]" />
-                  )}
-                </div>
-
-                <div className="flex-1 pb-2 min-w-0">
-                  <div className="font-medium text-xs sm:text-sm text-gray-900 dark:text-gray-100 truncate">
-                    {leg.mode === 'WALK'
-                      ? t('steps.walk')
-                      : `${t('steps.board')} ${leg.lineName || t(`modes.${leg.mode.toLowerCase()}`)}`}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">
-                    {leg.from.name} → {leg.to.name}
-                  </div>
-                  <div className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-500 mt-0.5 sm:mt-1">
-                    {formatDuration(leg.duration, i18n.language)} • {(leg.distance / 1000).toFixed(1)} km
-                  </div>
-                  {selected && focusedLegIndex === index && (
-                    <div className="text-[9px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
-                      🔍 Showing on map
-                    </div>
-                  )}
-                </div>
-              </button>
-            ))}
-          </motion.div>
-        )}
         </div>
       </div>
     </motion.div>

@@ -13,11 +13,6 @@ export function decodePolyline(encoded?: string | null): LatLngTuple[] {
     // Try precision 5 (OTP default for most versions)
     let decoded = polyline.decode(encoded, 5);
     
-    console.log('🔍 Decoded with precision 5:', {
-      count: decoded.length,
-      sample: decoded.length > 0 ? decoded[0] : null,
-    });
-    
     // Validate: check if coordinates are reasonable (within Philippines bounds)
     // Philippines is roughly lat: 4-21, lon: 116-127
     const isValid = decoded.length > 0 && decoded.every(([lat, lon]: [number, number]) => 
@@ -26,13 +21,7 @@ export function decodePolyline(encoded?: string | null): LatLngTuple[] {
     
     // If precision 5 gives bad results, try precision 6
     if (!isValid) {
-      console.log('⚠️ Precision 5 failed validation, trying precision 6');
       decoded = polyline.decode(encoded, 6);
-      
-      console.log('🔍 Decoded with precision 6:', {
-        count: decoded.length,
-        sample: decoded.length > 0 ? decoded[0] : null,
-      });
       
       // Validate precision 6 result
       const isValid6 = decoded.length > 0 && decoded.every(([lat, lon]: [number, number]) => 

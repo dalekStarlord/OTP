@@ -66,7 +66,7 @@ function LegCard({ leg, legNumber }: LegCardProps) {
           <ModeIcon mode={leg.mode} />
           <div className="flex-1 min-w-0">
             <div className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100 truncate">
-              {isWalk ? '🚶 Walk' : `🚌 ${leg.lineName || 'Transit'}`}
+              {isWalk ? '🚶 Walk' : `🚌 ${leg.vehicleName || leg.lineName || 'Transit'}`}
             </div>
             <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 font-medium">
               {durationMin} min • {distanceKm} km

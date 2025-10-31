@@ -115,11 +115,6 @@ function ItineraryCard({ itinerary, fareType, isSelected, onHover, onSelect }: I
   return (
     <button
       onClick={() => {
-        console.log('🔴 Route card clicked:', itinerary.id, {
-          duration: durationMin,
-          legs: itinerary.legs.length,
-          hasPolylines: itinerary.legs.every(leg => !!leg.polyline),
-        });
         onSelect(itinerary.id);
       }}
       onMouseEnter={() => onHover(itinerary.id)}
@@ -178,11 +173,11 @@ function ItineraryCard({ itinerary, fareType, isSelected, onHover, onSelect }: I
               <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${
                 isSelected ? 'bg-blue-600 text-white' : 'bg-green-100 text-green-800'
               }`}>
-                <span className="text-xs font-bold">{formatFare(totalFare)}</span>
+                <span className="text-xs font-bold">₱{formatFare(totalFare)}</span>
               </div>
               {fareType === 'discount' && savings > 0 && (
                 <span className="text-[10px] text-green-600 font-medium">
-                  Save {formatFare(savings)}
+                  Save ₱{formatFare(savings)}
                 </span>
               )}
             </div>

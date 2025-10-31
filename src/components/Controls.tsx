@@ -26,22 +26,11 @@ export default function Controls() {
       return;
     }
 
-    console.log('🎯 Starting route planning:', {
-      from,
-      to,
-      dateTime: dateTimeISO,
-      numItineraries
-    });
-
     setLoading(true);
     setError(undefined);
 
     try {
       const itineraries = await planTripGtfs(from, to, dateTimeISO, numItineraries);
-
-      console.log('📊 GTFS Results:', {
-        count: itineraries.length
-      });
 
       if (itineraries.length === 0) {
         setError('No routes found. Try different locations or times.');
@@ -49,7 +38,6 @@ export default function Controls() {
         setSelectedItineraryId(undefined);
       } else {
         const deduped = dedupeAndSort(itineraries);
-        console.log('✅ Successfully planned', deduped.length, 'routes');
         setItineraries(deduped);
         // Don't auto-select to prevent re-render issues
         // setSelectedItineraryId(deduped[0]?.id);

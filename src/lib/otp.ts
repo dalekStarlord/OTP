@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import type { Coord, NormalizedItinerary, NormalizedLeg } from './types';
 
-const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://665af012b878.ngrok-free.app';
+const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://99430e3979bc.ngrok-free.app';
 const GTFS_URL = import.meta.env.VITE_OTP_GTFS_GQL || `${OTP_BASE}/otp/gtfs/v1`;
 
 export const gtfsClient = new GraphQLClient(GTFS_URL, {
@@ -25,7 +25,6 @@ const GTFS_PLAN_QUERY = /* GraphQL */ `
       from: { lat: $fromLat, lon: $fromLon }
       to: { lat: $toLat, lon: $toLon }
       numItineraries: $numItineraries
-      transportModes: [{ mode: BUS }, { mode: WALK }]
     ) {
       itineraries {
         startTime
@@ -51,6 +50,11 @@ const GTFS_PLAN_QUERY = /* GraphQL */ `
             longName
             gtfsId
           }
+          trip {
+            tripShortName
+            tripHeadsign
+            gtfsId
+          }
           legGeometry {
             points
           }
@@ -74,6 +78,7 @@ export async function planTripGtfs(
   _dateTime: string, // Not used by this OTP GTFS endpoint
   numItineraries: number = 5
 ): Promise<NormalizedItinerary[]> {
+  // Simplified query for OTP 2.x - let it use defaults
   const variables: GtfsVars = {
     fromLat: from.lat,
     fromLon: from.lon,
@@ -82,14 +87,8 @@ export async function planTripGtfs(
     numItineraries,
   };
 
-  console.log('🚀 GTFS Request:', {
-    url: GTFS_URL,
-    variables
-  });
-
   try {
     const data: any = await gtfsClient.request(GTFS_PLAN_QUERY, variables);
-    console.log('✅ GTFS Response:', data);
     return normalizeGtfs(data);
   } catch (error) {
     console.error('❌ GTFS trip planning error:', error);
@@ -151,10 +150,14 @@ function normalizeGtfs(data: any): NormalizedItinerary[] {
   return itineraries.map((itinerary: any, idx: number) => {
     const legs: NormalizedLeg[] = (itinerary.legs || []).map((leg: any) => {
       const routeId = leg.route?.gtfsId || leg.route?.shortName || 'unknown';
-      const isBus = leg.mode === 'BUS';
+      // Check if this is a transit leg (not WALK) - includes BUS, TRANSIT, etc.
+      const isTransit = leg.mode && leg.mode !== 'WALK';
+      
+      // Map BUS mode to JEEPNEY for UI display (since it's CDO jeepney data)
+      const displayMode = leg.mode === 'BUS' ? 'JEEPNEY' : leg.mode;
       
       return {
-        mode: leg.mode || 'UNKNOWN',
+        mode: displayMode || 'UNKNOWN',
         from: {
           lat: leg.from?.lat || 0,
           lon: leg.from?.lon || 0,
@@ -169,12 +172,16 @@ function normalizeGtfs(data: any): NormalizedItinerary[] {
         duration: leg.duration || 0,
         lineName: leg.route?.shortName || leg.route?.longName,
         polyline: leg.legGeometry?.points,
-        fareProducts: isBus ? calculateFareProducts(leg.distance || 0, routeId) : [],
+        fareProducts: isTransit ? calculateFareProducts(leg.distance || 0, routeId) : [],
+        // Extract vehicle information from trip object
+        vehicleName: leg.trip?.tripShortName || undefined,
+        vehicleId: leg.trip?.gtfsId || undefined,
+        headsign: leg.trip?.tripHeadsign || undefined,
       };
     });
 
     // Count transfers as number of non-walk legs minus 1
-    const transitLegs = legs.filter(leg => leg.mode !== 'WALK').length;
+    const transitLegs = legs.filter(leg => leg.mode !== 'WALK' && leg.mode !== 'UNKNOWN').length;
     const transfers = Math.max(0, transitLegs - 1);
 
     return {
@@ -230,5 +237,178 @@ export async function checkHealth(
 
 export async function checkGtfsHealth(): Promise<'ok' | 'down'> {
   return checkHealth(gtfsClient);
+}
+
+// ===== DIAGNOSTICS =====
+
+/**
+ * Check what routes are available in the OTP server
+ */
+export async function checkAvailableRoutes(): Promise<void> {
+  const ROUTES_QUERY = `{
+    routes {
+      gtfsId
+      shortName
+      longName
+      mode
+    }
+  }`;
+  
+  try {
+    const data: any = await gtfsClient.request(ROUTES_QUERY);
+    return data;
+  } catch (error) {
+    console.error('❌ Failed to fetch routes:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check what stops are available in the OTP server
+ */
+export async function checkAvailableStops(): Promise<void> {
+  const STOPS_QUERY = `{
+    stops {
+      gtfsId
+      name
+      lat
+      lon
+    }
+  }`;
+  
+  try {
+    const data: any = await gtfsClient.request(STOPS_QUERY);
+    return data;
+  } catch (error) {
+    console.error('❌ Failed to fetch stops:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check the GraphQL schema for plan query parameters
+ */
+export async function checkPlanSchema(): Promise<void> {
+  const SCHEMA_QUERY = `{
+    __type(name: "QueryType") {
+      fields {
+        name
+        args {
+          name
+          type {
+            name
+            kind
+          }
+        }
+      }
+    }
+  }`;
+  
+  try {
+    const data: any = await gtfsClient.request(SCHEMA_QUERY);
+    return data;
+  } catch (error) {
+    console.error('❌ Failed to check schema:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check what service dates are available in GTFS
+ */
+export async function checkServiceDates(): Promise<void> {
+  // Try to get a sample trip with its service dates
+  const SERVICE_QUERY = `{
+    routes {
+      gtfsId
+      shortName
+      trips {
+        gtfsId
+        serviceId
+        tripHeadsign
+      }
+    }
+  }`;
+  
+  try {
+    const data: any = await gtfsClient.request(SERVICE_QUERY);
+    // Limit results in JavaScript instead of GraphQL
+    const limitedRoutes = data?.routes?.slice(0, 1) || [];
+    console.log('✅ Service dates check completed:', limitedRoutes.length, 'route(s) found');
+  } catch (error) {
+    console.error('❌ Failed to check service dates:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if routes have any trips scheduled
+ */
+export async function checkRouteTrips(): Promise<void> {
+  const TRIPS_QUERY = `{
+    routes {
+      gtfsId
+      shortName
+      longName
+      mode
+      trips {
+        gtfsId
+      }
+    }
+  }`;
+  
+  try {
+    const data: any = await gtfsClient.request(TRIPS_QUERY);
+    const routesWithTrips = data?.routes?.filter((r: any) => r.trips && r.trips.length > 0) || [];
+    
+    if (routesWithTrips.length === 0) {
+      console.error('❌ CRITICAL: No routes have trips scheduled! GTFS data is incomplete.');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('❌ Failed to check trips:', error);
+    throw error;
+  }
+}
+
+/**
+ * Test a simple route with minimal constraints
+ */
+export async function testSimpleRoute(from: Coord, to: Coord): Promise<void> {
+  const SIMPLE_QUERY = `
+    query TestPlan($fromLat: Float!, $fromLon: Float!, $toLat: Float!, $toLon: Float!) {
+      plan(
+        from: { lat: $fromLat, lon: $fromLon }
+        to: { lat: $toLat, lon: $toLon }
+        maxWalkDistance: 10000
+      ) {
+        itineraries {
+          duration
+          legs {
+            mode
+            from { name lat lon }
+            to { name lat lon }
+            route { shortName longName mode }
+          }
+        }
+      }
+    }
+  `;
+  
+  const variables = {
+    fromLat: from.lat,
+    fromLon: from.lon,
+    toLat: to.lat,
+    toLon: to.lon
+  };
+  
+  try {
+    const data: any = await gtfsClient.request(SIMPLE_QUERY, variables);
+    return data;
+  } catch (error) {
+    console.error('❌ Simple route test failed:', error);
+    throw error;
+  }
 }
 

@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { NormalizedLeg, NormalizedItinerary, FareType } from './types';
+import type { NormalizedLeg, NormalizedItinerary, FareType, Coord } from './types';
+import { reverseGeocode } from './api';
 
 /**
  * Merge Tailwind CSS classes with clsx
@@ -34,13 +35,13 @@ export function formatDuration(seconds: number, locale: string = 'en'): string {
  * Format fare in Philippine pesos
  */
 export function formatFare(amount: number): string {
-  return `₱${amount.toFixed(2)}`;
+  return amount.toFixed(2);
 }
 
 /**
  * Format distance in meters to km or m
  */
-export function formatDistance(meters: number, locale: string = 'en'): string {
+export function formatDistance(meters: number, _locale: string = 'en'): string {
   if (meters >= 1000) {
     return `${(meters / 1000).toFixed(1)} km`;
   }
@@ -84,7 +85,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -185,7 +186,7 @@ export function getDisplayFare(leg: NormalizedLeg, fareType: FareType): number {
  */
 export function calculateTotalFare(itinerary: NormalizedItinerary, fareType: FareType): number {
   return itinerary.legs
-    .filter(leg => leg.mode === 'BUS') // Only transit legs
+    .filter(leg => leg.mode !== 'WALK' && leg.mode !== 'UNKNOWN') // Only transit legs (JEEPNEY, BUS, etc.)
     .reduce((total, leg) => total + getDisplayFare(leg, fareType), 0);
 }
 
@@ -196,5 +197,96 @@ export function calculateFareSavings(itinerary: NormalizedItinerary): number {
   const regularFare = calculateTotalFare(itinerary, 'regular');
   const discountFare = calculateTotalFare(itinerary, 'discount');
   return regularFare - discountFare;
+}
+
+/**
+ * Cache for reverse geocoded stop names to avoid repeated API calls
+ */
+const stopNameCache = new Map<string, Promise<string>>();
+
+/**
+ * Format stop name with enhanced location context using reverse geocoding
+ * This provides user-friendly names like "SM Downtown" instead of "Stop ID 12345"
+ */
+export async function formatStopName(
+  coord: Coord,
+  rawName?: string
+): Promise<string> {
+  // Generate cache key from coordinates
+  const cacheKey = `${coord.lat.toFixed(4)},${coord.lon.toFixed(4)}`;
+  
+  // Return cached promise if available
+  if (stopNameCache.has(cacheKey)) {
+    return stopNameCache.get(cacheKey)!;
+  }
+  
+  // Create new promise for this coordinate
+  const promise = (async () => {
+    try {
+      // Use reverse geocoding to get meaningful location name
+      const result = await reverseGeocode(coord);
+      
+      if (result && result.name) {
+        // Prioritize landmark/POI names over streets
+        if (result.type === 'landmark' || result.type === 'poi') {
+          return result.name;
+        }
+        
+        // For streets, combine with city if available
+        if (result.type === 'street' && result.address) {
+          const addressParts = result.address.split(',');
+          // Take the first two parts (usually street and city)
+          return addressParts.slice(0, 2).join(', ').trim();
+        }
+        
+        // Return the name if available
+        return result.name;
+      }
+      
+      // Fallback to raw name from GTFS if available
+      if (rawName && rawName.length > 0) {
+        // Clean up common GTFS stop name patterns
+        return cleanStopName(rawName);
+      }
+      
+      // Final fallback
+      return 'Unknown location';
+    } catch (error) {
+      console.warn('Failed to format stop name:', error);
+      
+      // Return cleaned raw name or fallback
+      if (rawName && rawName.length > 0) {
+        return cleanStopName(rawName);
+      }
+      return 'Unknown location';
+    }
+  })();
+  
+  // Cache the promise
+  stopNameCache.set(cacheKey, promise);
+  
+  return promise;
+}
+
+/**
+ * Clean up GTFS stop names to be more user-friendly
+ */
+function cleanStopName(rawName: string): string {
+  // Remove common prefixes/suffixes
+  let cleaned = rawName.trim();
+  
+  // Remove "Stop ID" patterns
+  cleaned = cleaned.replace(/^Stop\s*(ID\s*)?[:\s-]*/i, '');
+  
+  // Remove route prefixes like "R070-"
+  cleaned = cleaned.replace(/^[A-Z]\d+[-_]\s*/, '');
+  
+  // Remove terminal suffixes
+  cleaned = cleaned.replace(/-?\s*Terminal\s*$/i, '');
+  
+  // Capitalize properly
+  return cleaned.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 

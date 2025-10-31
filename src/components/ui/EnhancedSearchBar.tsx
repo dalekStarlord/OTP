@@ -31,7 +31,7 @@ export function EnhancedSearchBar({
   autoFocus = false,
 }: EnhancedSearchBarProps) {
   const { t } = useTranslation();
-  const { recentSearches, savedPlaces, setStatus } = useAppStore();
+  const { recentSearches, savedPlaces, setStatus, addToast } = useAppStore();
   const { pickingMode, setPickingMode } = usePlanStore();
   const isPicking = pickingMode === type;
   const [query, setQuery] = useState(value?.name || '');
@@ -76,11 +76,9 @@ export function EnhancedSearchBar({
   // Update input when value changes (e.g., from map pick or clear)
   useEffect(() => {
     if (value?.name) {
-      console.log(`📍 ${type.toUpperCase()} location updated:`, value);
       setQuery(value.name);
     } else if (value === undefined) {
       // Clear the input when value is cleared
-      console.log(`🗑️ ${type.toUpperCase()} location cleared`);
       setQuery('');
     }
   }, [value, type]);
@@ -88,6 +86,11 @@ export function EnhancedSearchBar({
   // Handle geolocation
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
+      console.error('Geolocation is not supported by this browser');
+      addToast({
+        type: 'error',
+        message: 'Geolocation is not supported by this browser',
+      });
       return;
     }
 
@@ -108,7 +111,46 @@ export function EnhancedSearchBar({
       (error) => {
         console.error('Geolocation error:', error);
         setStatus({ gpsLock: false });
-        // Show error toast would go here
+        
+        let errorMessage = 'Unable to get your location';
+        let instructions = '';
+        
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMessage = 'Location access is blocked';
+          
+          // Provide browser-specific instructions
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+          const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+          const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+          const isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
+          
+          if (isIOS && isSafari) {
+            instructions = 'Go to Settings > Safari > Location Services, then turn it on and allow this website.';
+          } else if (isChrome) {
+            instructions = 'Click the location icon 🔒 in the address bar, then allow location access.';
+          } else if (isFirefox) {
+            instructions = 'Click the location icon in the address bar, then click "Allow".';
+          } else if (isSafari) {
+            instructions = 'Go to Safari > Settings for this Website > Location, then select "Allow".';
+          } else {
+            instructions = 'Click the location icon in your browser\'s address bar and select "Allow".';
+          }
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMessage = 'Location information unavailable. Please try again or enter a location manually.';
+        } else if (error.code === error.TIMEOUT) {
+          errorMessage = 'Location request timed out. Please try again.';
+        }
+        
+        addToast({
+          type: 'error',
+          message: instructions ? `${errorMessage} ${instructions}` : errorMessage,
+          duration: instructions ? 8000 : 5000,
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
       }
     );
   };
@@ -141,11 +183,9 @@ export function EnhancedSearchBar({
     
     if (currentMode === type) {
       // Toggle off if already picking this field
-      console.log(`🔵 Deactivating picking mode for ${type}`);
       setPickingMode(null);
     } else {
       // Activate picking mode for this field
-      console.log(`🔵 Activating picking mode for ${type}`);
       setPickingMode(type);
       setFocused(false);
     }

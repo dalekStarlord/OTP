@@ -3,6 +3,7 @@ import type { AppState, Coord, NormalizedItinerary, NavigationState, FareType } 
 
 type PlanStore = AppState & {
   focusedLegIndex: number | null;
+  viewingLegIndex: number | null; // Which leg detail view is active (null = showing legs list)
   setFrom: (coord?: Coord) => void;
   setTo: (coord?: Coord) => void;
   setDateTime: (dateTime: string) => void;
@@ -11,6 +12,7 @@ type PlanStore = AppState & {
   setItineraries: (itineraries?: NormalizedItinerary[]) => void;
   setSelectedItineraryId: (id?: string) => void;
   setFocusedLegIndex: (index: number | null) => void;
+  setViewingLegIndex: (index: number | null) => void;
   setPickingMode: (mode: 'from' | 'to' | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error?: string) => void;
@@ -48,14 +50,27 @@ const initialState: AppState = {
 export const usePlanStore = create<PlanStore>((set) => ({
   ...initialState,
   focusedLegIndex: null,
+  viewingLegIndex: null,
   setFrom: (coord) => set({ from: coord, error: undefined }),
   setTo: (coord) => set({ to: coord, error: undefined }),
   setDateTime: (dateTime) => set({ dateTimeISO: dateTime }),
   setNumItineraries: (num) => set({ numItineraries: num }),
   setFareType: (fareType) => set({ fareType }),
   setItineraries: (itineraries) => set({ itineraries }),
-  setSelectedItineraryId: (id) => set({ selectedItineraryId: id, focusedLegIndex: null }),
+  setSelectedItineraryId: (id) => {
+    // When selecting an itinerary, preserve focusedLegIndex if it's the same itinerary
+    // Only clear it if switching to a different itinerary
+    set((state) => {
+      if (state.selectedItineraryId === id) {
+        // Same itinerary - preserve focused leg
+        return { selectedItineraryId: id };
+      }
+      // Different itinerary - clear focused leg and viewing leg
+      return { selectedItineraryId: id, focusedLegIndex: null, viewingLegIndex: null };
+    });
+  },
   setFocusedLegIndex: (index) => set({ focusedLegIndex: index }),
+  setViewingLegIndex: (index) => set({ viewingLegIndex: index }),
   setPickingMode: (mode) => set({ pickingMode: mode }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
@@ -93,6 +108,7 @@ export const usePlanStore = create<PlanStore>((set) => ({
       itineraries: undefined,
       selectedItineraryId: undefined,
       focusedLegIndex: null,
+      viewingLegIndex: null,
       error: undefined,
       pickingMode: null,
       navigation: initialNavigationState,

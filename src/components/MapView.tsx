@@ -144,20 +144,14 @@ function MapClickHandler() {
 
   useMapEvents({
     click: (e) => {
-      console.log('🗺️ Map clicked:', { lat: e.latlng.lat, lon: e.latlng.lng, pickingMode });
-      
       if (pickingMode === 'from') {
         const location = { lat: e.latlng.lat, lon: e.latlng.lng, name: `Location (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)})` };
-        console.log('✅ Setting FROM location:', location);
         setFrom(location);
         setPickingMode(null);
       } else if (pickingMode === 'to') {
         const location = { lat: e.latlng.lat, lon: e.latlng.lng, name: `Location (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)})` };
-        console.log('✅ Setting TO location:', location);
         setTo(location);
         setPickingMode(null);
-      } else {
-        console.log('ℹ️ Map clicked but picking mode not active');
       }
     },
   });
@@ -240,11 +234,8 @@ function MapBoundsHandler() {
 
     const selectedItinerary = itineraries.find((itin) => itin.id === selectedItineraryId);
     if (!selectedItinerary) {
-      console.warn('⚠️ Selected itinerary not found:', selectedItineraryId);
       return;
     }
-
-    console.log('🎯 Fitting map bounds for selected itinerary:', selectedItineraryId);
 
     const bounds = L.latLngBounds([]);
     let hasPoints = false;
@@ -253,13 +244,11 @@ function MapBoundsHandler() {
       if (leg.polyline) {
         const coords = decodePolyline(leg.polyline);
         if (coords.length > 0) {
-          console.log(`✅ Adding ${coords.length} polyline coords from ${leg.mode} leg to bounds`);
           coords.forEach(([lat, lng]) => {
             bounds.extend([lat, lng]);
             hasPoints = true;
           });
         } else {
-          console.log(`⚠️ ${leg.mode} leg polyline decoded to 0 coords, using from/to instead`);
           // Fallback to leg endpoints
           if (leg.from?.lat && leg.from?.lon) {
             bounds.extend([leg.from.lat, leg.from.lon]);
@@ -271,7 +260,6 @@ function MapBoundsHandler() {
           }
         }
       } else {
-        console.log(`⚠️ ${leg.mode} leg has no polyline, using from/to coordinates`);
         // No polyline - use leg endpoints (common for WALK legs)
         if (leg.from?.lat && leg.from?.lon) {
           bounds.extend([leg.from.lat, leg.from.lon]);
@@ -286,18 +274,14 @@ function MapBoundsHandler() {
 
     // Final fallback to overall from/to markers
     if (!hasPoints) {
-      console.log('⚠️ No valid coordinates found in any leg, using overall from/to markers');
       if (from) bounds.extend([from.lat, from.lon]);
       if (to) bounds.extend([to.lat, to.lon]);
       hasPoints = !!(from && to);
     }
 
     if (bounds.isValid() && hasPoints) {
-      console.log('✅ Fitting bounds:', bounds.toBBoxString());
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
       boundsUpdatedRef.current = true;
-    } else {
-      console.warn('⚠️ Bounds invalid or no points found');
     }
   }, [selectedItineraryId, itineraries, map, from, to]);
 
@@ -306,7 +290,6 @@ function MapBoundsHandler() {
     if (boundsUpdatedRef.current) return;
     if (!from || !to) return;
 
-    console.log('🎯 Initial bounds fit to from/to markers');
     const bounds = L.latLngBounds([[from.lat, from.lon], [to.lat, to.lon]]);
     map.fitBounds(bounds, { padding: [50, 50] });
   }, [from?.lat, from?.lon, to?.lat, to?.lon, map]);
@@ -410,14 +393,6 @@ function ItineraryPolylines({ itinerary, itineraryIndex, highlight, focusedLegIn
   // Get unique color for this route
   const routeColor = getRouteColor(itineraryIndex);
 
-  // Debug logging
-  console.log('🗺️ Rendering polylines for itinerary:', itinerary.id, {
-    highlight,
-    isNavigating,
-    legCount: itinerary.legs.length,
-    routeColor,
-  });
-
   return (
     <>
       {itinerary.legs.map((leg, idx) => {
@@ -427,21 +402,12 @@ function ItineraryPolylines({ itinerary, itineraryIndex, highlight, focusedLegIn
         }
 
         if (!leg.polyline) {
-          console.warn(`⚠️ Leg ${idx} of itinerary ${itinerary.id} has no polyline data`);
           return null;
         }
 
         const coords = decodePolyline(leg.polyline);
-        console.log(`📍 Leg ${idx} (${leg.mode}):`, {
-          polylineLength: leg.polyline.length,
-          decodedCoords: coords.length,
-          firstCoord: coords[0],
-          lastCoord: coords[coords.length - 1],
-          isFocused: focusedLegIndex === idx,
-        });
         
         if (coords.length === 0) {
-          console.warn(`⚠️ Leg ${idx} polyline decode failed or returned 0 coordinates`);
           return null;
         }
 

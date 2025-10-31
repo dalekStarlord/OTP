@@ -23,6 +23,10 @@ export type NormalizedLeg = {
   lineName?: string;
   polyline?: string; // encoded
   fareProducts?: FareProduct[];
+  // Vehicle-specific information from GTFS trip
+  vehicleName?: string; // Display name of vehicle (e.g., "Triple A", "San Miguel")
+  vehicleId?: string; // Unique identifier from GTFS trip_id or vehicle_id
+  headsign?: string; // Trip direction/destination (e.g., "To Bulua")
 };
 
 export type NormalizedItinerary = {
