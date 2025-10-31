@@ -4,12 +4,11 @@
 
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
-import { Sun, Moon, Languages, Type, Eye, Info } from 'lucide-react';
-import { Button } from '../components/ui/Button';
+import { Sun, Moon, Languages, Type, Eye } from 'lucide-react';
 
 export function Settings() {
   const { t, i18n } = useTranslation();
-  const { preferences, setPreferences, setHelpDialogOpen } = useAppStore();
+  const { preferences, setPreferences } = useAppStore();
 
   const themes = [
     { id: 'light', icon: Sun, label: t('settings.themeLight') },
@@ -114,29 +113,6 @@ export function Settings() {
               ))}
             </div>
           </div>
-        </section>
-
-        {/* About */}
-        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-5 md:p-6 space-y-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <Info className="h-4 w-4 sm:h-5 sm:w-5" />
-            {t('settings.about')}
-          </h2>
-
-          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex justify-between py-2">
-              <span>{t('settings.version')}</span>
-              <span className="font-medium">0.3.0</span>
-            </div>
-          </div>
-
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={() => setHelpDialogOpen(true)}
-          >
-            {t('settings.help')}
-          </Button>
         </section>
       </div>
     </div>

@@ -70,7 +70,7 @@ export default function NavigationControls() {
             </div>
             {!isCollapsed && currentLeg && (
               <div className="text-xs text-white/90 mt-1 truncate">
-                {currentLeg.mode === 'WALK' ? '🚶 Walking' : `🚌 ${currentLeg.lineName || 'Transit'}`}
+                {currentLeg.mode === 'WALK' ? '🚶 Walking' : `🚐 ${currentLeg.lineName || 'Transit'}`}
               </div>
             )}
           </div>

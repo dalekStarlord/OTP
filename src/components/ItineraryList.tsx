@@ -60,7 +60,7 @@ export default function ItineraryList({ onHover, onSelect }: ItineraryListProps)
       <div className="max-w-4xl mx-auto p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-gray-900 text-lg">
-            🚌 {itineraries.length} {itineraries.length === 1 ? 'Route' : 'Routes'} Found
+            🚐 {itineraries.length} {itineraries.length === 1 ? 'Route' : 'Routes'} Found
           </h3>
           <span className="text-xs text-gray-500 font-medium px-2 py-1 bg-gray-100 rounded-full">
             Tap to view on map
@@ -210,7 +210,7 @@ function ModeIcon({ mode }: { mode: string }) {
   if (upperMode === 'BUS') {
     return (
       <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 rounded-lg" title="Bus/Jeepney">
-        <span className="text-base">🚌</span>
+        <span className="text-base">🚐</span>
         <span className="text-xs font-medium text-blue-700">Jeepney</span>
       </div>
     );

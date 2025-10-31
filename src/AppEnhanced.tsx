@@ -21,16 +21,11 @@ import { useAppStore } from './store/appStore';
 import { useEffect } from 'react';
 import {
   Home as HomeIcon,
-  Radio,
-  Star,
-  AlertCircle,
-  MessageSquarePlus,
   Settings as SettingsIcon,
-  Menu,
-  X,
 } from 'lucide-react';
 import { cn } from './lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation as useRouterLocation } from 'react-router-dom';
+import { useState } from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,8 +45,100 @@ const navItems = [
   { to: '/settings', icon: SettingsIcon, labelKey: 'nav.settings' },
 ];
 
+function AppContent() {
+  const location = useRouterLocation();
+  const isHomePage = location.pathname === '/';
+  const [mobileActiveTab, setMobileActiveTab] = useState<'plan' | 'settings'>('plan');
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Skip link for accessibility */}
+      <SkipLink />
+
+      {/* App status bar */}
+      <AppStatusBar />
+
+      {/* Toast notifications */}
+      <ToastContainer />
+
+      {/* Help dialog */}
+      <HelpDialog />
+
+      {/* Mobile header with tabs - Only on Home page */}
+      {isHomePage && (
+        <header className="lg:hidden bg-blue-600 dark:bg-blue-700 text-white shadow-md relative z-50">
+          <div className="flex items-center justify-between px-4 py-3">
+            <h1 className="text-xl font-bold">CDO Jeepney Planner</h1>
+          </div>
+          <div className="flex border-t border-blue-500 dark:border-blue-600">
+            <button
+              onClick={() => setMobileActiveTab('plan')}
+              className={cn(
+                "flex-1 py-3 text-center font-medium text-sm transition-colors relative",
+                mobileActiveTab === 'plan'
+                  ? "text-white"
+                  : "text-blue-100 hover:text-white"
+              )}
+            >
+              <HomeIcon className="h-4 w-4 inline-block mr-1" />
+              Plan Trip
+              {mobileActiveTab === 'plan' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
+              )}
+            </button>
+            <button
+              onClick={() => setMobileActiveTab('settings')}
+              className={cn(
+                "flex-1 py-3 text-center font-medium text-sm transition-colors relative",
+                mobileActiveTab === 'settings'
+                  ? "text-white"
+                  : "text-blue-100 hover:text-white"
+              )}
+            >
+              <SettingsIcon className="h-4 w-4 inline-block mr-1" />
+              Settings
+              {mobileActiveTab === 'settings' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
+              )}
+            </button>
+          </div>
+        </header>
+      )}
+
+      <div className="flex">
+        {/* Desktop sidebar - Hidden on Home page (≥ md) */}
+        {!isHomePage && (
+          <aside className="hidden md:flex md:flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                 CDO Jeepney Planner
+              </h1>
+            </div>
+
+            <nav className="flex-1 px-3">
+              <Navigation />
+            </nav>
+          </aside>
+        )}
+
+        {/* Main content */}
+        <main className="flex-1" id="main-content">
+          <Routes>
+            <Route path="/" element={isHomePage && mobileActiveTab === 'settings' ? <Settings /> : <Home />} />
+            <Route path="/live" element={<LiveTracker />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/advisories" element={<Advisories />} />
+            <Route path="/contribute" element={<Contribute />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 export default function AppEnhanced() {
-  const { preferences, sidebarOpen, setSidebarOpen } = useAppStore();
+  const { preferences } = useAppStore();
 
   // Apply theme
   useEffect(() => {
@@ -90,103 +177,7 @@ export default function AppEnhanced() {
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={i18n}>
         <BrowserRouter>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {/* Skip link for accessibility */}
-            <SkipLink />
-
-            {/* App status bar */}
-            <AppStatusBar />
-
-            {/* Toast notifications */}
-            <ToastContainer />
-
-            {/* Help dialog */}
-            <HelpDialog />
-
-            {/* Mobile header */}
-            <header className="md:hidden bg-blue-600 dark:bg-blue-700 text-white shadow-md relative z-50">
-              <div className="flex items-center justify-between px-4 py-3">
-                <h1 className="text-xl font-bold">CDO Jeepney</h1>
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-white"
-                  aria-label="Menu"
-                  aria-expanded={sidebarOpen}
-                >
-                  {sidebarOpen ? (
-                    <X className="h-6 w-6" />
-                  ) : (
-                    <Menu className="h-6 w-6" />
-                  )}
-                </button>
-              </div>
-            </header>
-
-            <div className="flex">
-              {/* Desktop sidebar */}
-              <aside className="hidden md:flex md:flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    🚌 CDO Jeepney
-                  </h1>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Navigate with ease
-                  </p>
-                </div>
-
-                <nav className="flex-1 px-3">
-                  <Navigation />
-                </nav>
-              </aside>
-
-              {/* Mobile sidebar */}
-              <AnimatePresence>
-                {sidebarOpen && (
-                  <>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setSidebarOpen(false)}
-                      className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                    />
-                    <motion.aside
-                      initial={{ x: -280 }}
-                      animate={{ x: 0 }}
-                      exit={{ x: -280 }}
-                      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                      className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-xl z-50 md:hidden"
-                    >
-                      <div className="p-6">
-                        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                          🚌 CDO Jeepney
-                        </h1>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          Navigate with ease
-                        </p>
-                      </div>
-
-                      <nav className="px-3">
-                        <Navigation onNavigate={() => setSidebarOpen(false)} />
-                      </nav>
-                    </motion.aside>
-                  </>
-                )}
-              </AnimatePresence>
-
-              {/* Main content */}
-              <main className="flex-1" id="main-content">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/live" element={<LiveTracker />} />
-                  <Route path="/favorites" element={<Favorites />} />
-                  <Route path="/advisories" element={<Advisories />} />
-                  <Route path="/contribute" element={<Contribute />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Routes>
-              </main>
-            </div>
-          </div>
+          <AppContent />
         </BrowserRouter>
       </I18nextProvider>
     </QueryClientProvider>

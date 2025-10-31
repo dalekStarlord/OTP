@@ -31,7 +31,7 @@ export default function App() {
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-md">
           <div className="px-4 py-3">
             <h1 className="text-white text-xl font-bold tracking-tight">
-              🚌 CDO Jeepney Planner
+              🚐 CDO Jeepney Planner
             </h1>
           </div>
         </div>
