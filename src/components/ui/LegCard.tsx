@@ -22,7 +22,7 @@ export function LegCard({ leg, legIndex, fareType, onClick }: LegCardProps) {
   // Display priority: vehicleName > lineName > mode
   const displayName = leg.mode === 'WALK'
     ? 'Walk'
-    : (leg.vehicleName || leg.lineName || leg.mode);
+    : (leg.headsign);
 
   // Get fare for this leg (only for transit legs)
   const legFare = leg.mode !== 'WALK' && leg.fareProducts

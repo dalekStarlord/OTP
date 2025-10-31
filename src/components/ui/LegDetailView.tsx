@@ -70,16 +70,6 @@ export function LegDetailView({ leg, legIndex, fareType, onBack }: LegDetailView
         >
           <span className="text-lg">←</span>
         </button>
-        <div className="flex-1 min-w-0">
-          <div className="font-semibold text-base text-gray-900 dark:text-gray-100 truncate">
-            {displayName}
-          </div>
-          {leg.headsign && (
-            <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
-              {leg.headsign}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Gradient Header Card */}
