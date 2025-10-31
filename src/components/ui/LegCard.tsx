@@ -51,7 +51,7 @@ export function LegCard({ leg, legIndex, fareType, onClick }: LegCardProps) {
 
       {/* Route Name and Duration */}
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+        <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate text-wrap">
           {displayName}
         </div>
         <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
