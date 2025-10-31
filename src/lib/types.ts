@@ -44,7 +44,14 @@ export type NavigationState = {
   isPaused: boolean;
   currentLegIndex: number;
   progressOnLeg: number; // 0 to 1
-  speed: number; // meters per second
+  speed: number; // meters per second (for simulation mode)
+  // Real-time GPS tracking fields
+  isRealTimeTracking: boolean; // true = GPS, false = simulation
+  gpsPosition?: { lat: number; lon: number; accuracy?: number };
+  distanceTraveled: number; // meters along route
+  lastGpsUpdate?: number; // timestamp
+  completedSegments?: Set<number>; // indices of route segments that have been passed
+  segmentPassedTimes?: Map<number, number>; // segment index -> timestamp when passed
 };
 
 export type FareType = 'regular' | 'discount';

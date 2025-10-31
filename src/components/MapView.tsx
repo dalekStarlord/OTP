@@ -1,9 +1,25 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { usePlanStore } from '../store/planStore';
 import { decodePolyline, getLegStyle, getHighlightedLegStyle, getRouteColor } from '../lib/polyline';
 import type { NormalizedItinerary } from '../lib/types';
+import { calculateRouteProgress } from '../lib/gps-tracker';
+
+// Helper function to calculate distance between two points
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000; // Earth radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 // Fix Leaflet default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -46,6 +62,12 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
   const userPosition = React.useMemo(() => {
     if (!navigation.isNavigating || !selectedItineraryId || !itineraries) return null;
     
+    // For real-time GPS tracking, use actual GPS position
+    if (navigation.isRealTimeTracking && navigation.gpsPosition) {
+      return [navigation.gpsPosition.lat, navigation.gpsPosition.lon] as [number, number];
+    }
+    
+    // For simulation, calculate position along route
     const selectedItinerary = itineraries.find((it) => it.id === selectedItineraryId);
     if (!selectedItinerary) return null;
     
@@ -80,6 +102,7 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
         <MapBoundsHandler />
         <LegFocusHandler />
         <NavigationSimulator />
+        <RealTimeGpsTracker />
         
         {/* Render polylines ONLY for selected itinerary */}
         {itineraries?.map((itinerary, index) => {
@@ -297,6 +320,149 @@ function MapBoundsHandler() {
   return null;
 }
 
+// Component to handle real-time GPS tracking
+function RealTimeGpsTracker() {
+  const {
+    navigation,
+    selectedItineraryId,
+    itineraries,
+    updateNavigationProgress,
+    updateGpsPosition,
+    resetNavigation,
+  } = usePlanStore();
+  const map = useMap();
+  const watchIdRef = useRef<number | null>(null);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Only track if real-time navigation is enabled and not paused
+    if (
+      !navigation.isNavigating ||
+      !navigation.isRealTimeTracking ||
+      navigation.isPaused ||
+      !selectedItineraryId ||
+      !itineraries
+    ) {
+      // Stop watching if conditions not met
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+      return;
+    }
+
+    const selectedItinerary = itineraries.find((it) => it.id === selectedItineraryId);
+    if (!selectedItinerary) return;
+
+    // Start watching GPS position
+    if (!navigator.geolocation) {
+      setGpsError('Geolocation not supported');
+      return;
+    }
+
+    const options: PositionOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 2000, // Accept position up to 2 seconds old
+    };
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        setGpsError(null);
+        const gpsPos = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        };
+
+        // Update GPS position in store
+        updateGpsPosition(gpsPos);
+
+        // Calculate route progress based on GPS position
+        const progress = calculateRouteProgress(gpsPos, selectedItinerary);
+        
+        // Update navigation progress
+        updateNavigationProgress(progress.legIndex, progress.progress);
+
+        // Center map on user position (smoothly) - only if significantly moved
+        const currentCenter = map.getCenter();
+        const distanceMoved = haversineDistance(
+          currentCenter.lat,
+          currentCenter.lng,
+          gpsPos.lat,
+          gpsPos.lon
+        );
+        
+        // Only pan if moved more than 20 meters (reduces jittery movement)
+        if (distanceMoved > 20) {
+          map.panTo([gpsPos.lat, gpsPos.lon], {
+            duration: 0.5,
+          });
+        }
+
+        // Check if route is complete
+        if (
+          progress.legIndex >= selectedItinerary.legs.length - 1 &&
+          progress.progress >= 0.95
+        ) {
+          // Route complete
+          resetNavigation();
+          navigator.geolocation.clearWatch(watchIdRef.current!);
+          watchIdRef.current = null;
+        }
+
+        // Warn if user is off route (more than 50 meters)
+        if (progress.distanceFromRoute > 50) {
+          console.warn(`⚠️ User is ${Math.round(progress.distanceFromRoute)}m off route`);
+        }
+      },
+      (error) => {
+        let errorMessage = 'GPS error';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'GPS permission denied';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'GPS position unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'GPS timeout';
+            break;
+        }
+        setGpsError(errorMessage);
+        console.error('GPS error:', errorMessage);
+      },
+      options
+    );
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [
+    navigation.isNavigating,
+    navigation.isRealTimeTracking,
+    navigation.isPaused,
+    selectedItineraryId,
+    itineraries,
+    map,
+    updateNavigationProgress,
+    updateGpsPosition,
+    resetNavigation,
+  ]);
+
+  // Display GPS error if any (could show a toast here)
+  useEffect(() => {
+    if (gpsError && navigation.isRealTimeTracking) {
+      console.error('GPS Tracking Error:', gpsError);
+    }
+  }, [gpsError, navigation.isRealTimeTracking]);
+
+  return null;
+}
+
 // Component to simulate navigation movement
 function NavigationSimulator() {
   const { 
@@ -311,7 +477,14 @@ function NavigationSimulator() {
   const isNavigatingRef = useRef(false);
 
   useEffect(() => {
-    if (!navigation.isNavigating || navigation.isPaused || !selectedItineraryId || !itineraries) {
+    // Don't run simulation if real-time GPS tracking is active
+    if (
+      !navigation.isNavigating || 
+      navigation.isRealTimeTracking || 
+      navigation.isPaused || 
+      !selectedItineraryId || 
+      !itineraries
+    ) {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -390,8 +563,56 @@ function ItineraryPolylines({ itinerary, itineraryIndex, highlight, focusedLegIn
   const { navigation, selectedItineraryId } = usePlanStore();
   const isNavigating = navigation.isNavigating && itinerary.id === selectedItineraryId;
   
+  // Force re-render for fading animation
+  const [, setTick] = useState(0);
+  
+  useEffect(() => {
+    if (!isNavigating) return;
+    
+    // Update every 100ms for smooth fading animation
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 100);
+    
+    return () => clearInterval(interval);
+  }, [isNavigating]);
+  
   // Get unique color for this route
   const routeColor = getRouteColor(itineraryIndex);
+
+  // Calculate fading opacity for completed segments (Google Maps style)
+  const getFadedOpacity = (legIndex: number, segmentIndex?: number): number => {
+    if (!isNavigating || legIndex > navigation.currentLegIndex) {
+      return 1; // Not yet reached
+    }
+
+    if (legIndex < navigation.currentLegIndex) {
+      // Leg is fully completed - fade out over time
+      const completedTime = navigation.segmentPassedTimes?.get(legIndex) || Date.now();
+      const timeSinceCompletion = Date.now() - completedTime;
+      const fadeDuration = 8000; // 8 seconds to fade
+      const fadeProgress = Math.min(timeSinceCompletion / fadeDuration, 1);
+      // Start at 0.4, fade to 0.1
+      return Math.max(0.1, 0.4 - (fadeProgress * 0.3));
+    }
+
+    // Current leg - use progress to determine opacity
+    if (segmentIndex !== undefined) {
+      const progress = navigation.progressOnLeg;
+      const segmentProgress = segmentIndex / (itinerary.legs[navigation.currentLegIndex]?.polyline ? decodePolyline(itinerary.legs[navigation.currentLegIndex].polyline!).length - 1 : 1);
+      
+      if (segmentProgress < progress) {
+        // This segment has been passed - fade it
+        const passedTime = navigation.segmentPassedTimes?.get(legIndex * 1000 + segmentIndex) || Date.now();
+        const timeSincePassed = Date.now() - passedTime;
+        const fadeDuration = 8000;
+        const fadeProgress = Math.min(timeSincePassed / fadeDuration, 1);
+        return Math.max(0.1, 0.4 - (fadeProgress * 0.3));
+      }
+    }
+
+    return 1; // Not yet passed
+  };
 
   return (
     <>
@@ -421,10 +642,17 @@ function ItineraryPolylines({ itinerary, itineraryIndex, highlight, focusedLegIn
           ? getHighlightedLegStyle(leg.mode, routeColor)
           : getLegStyle(leg.mode, routeColor);
 
-        // If navigating, show consumed path effect
+        // If navigating, show consumed path effect with gradual fading
         if (isNavigating) {
           if (idx < navigation.currentLegIndex) {
-            // Completed legs: show in faded gray/dashed
+            // Completed legs: gradual fade out
+            const opacity = getFadedOpacity(idx);
+            
+            // If opacity is very low, don't render
+            if (opacity < 0.15) {
+              return null;
+            }
+
             return (
               <Polyline
                 key={`${itinerary.id}-leg-${idx}-consumed`}
@@ -432,31 +660,36 @@ function ItineraryPolylines({ itinerary, itineraryIndex, highlight, focusedLegIn
                 pathOptions={{
                   color: '#9ca3af',
                   weight: 3,
-                  opacity: 0.4,
+                  opacity,
                   dashArray: '5, 10',
                 }}
               />
             );
           } else if (idx === navigation.currentLegIndex) {
-            // Current leg: split into consumed and remaining
+            // Current leg: split into consumed (fading) and remaining (bright)
             const splitIndex = Math.floor(navigation.progressOnLeg * (coords.length - 1));
             const consumedCoords = coords.slice(0, splitIndex + 1);
             const remainingCoords = coords.slice(splitIndex);
 
             return (
               <React.Fragment key={`${itinerary.id}-leg-${idx}-split`}>
-                {/* Consumed portion - faded */}
-                {consumedCoords.length > 1 && (
-                  <Polyline
-                    positions={consumedCoords}
-                    pathOptions={{
-                      color: '#9ca3af',
-                      weight: 3,
-                      opacity: 0.4,
-                      dashArray: '5, 10',
-                    }}
-                  />
-                )}
+                {/* Consumed portion - gradually fading */}
+                {consumedCoords.length > 1 && (() => {
+                  const opacity = getFadedOpacity(idx, splitIndex);
+                  // Only render if opacity is significant
+                  if (opacity < 0.15) return null;
+                  return (
+                    <Polyline
+                      positions={consumedCoords}
+                      pathOptions={{
+                        color: '#9ca3af',
+                        weight: 3,
+                        opacity,
+                        dashArray: '5, 10',
+                      }}
+                    />
+                  );
+                })()}
                 {/* Remaining portion - bright */}
                 {remainingCoords.length > 1 && (
                   <Polyline

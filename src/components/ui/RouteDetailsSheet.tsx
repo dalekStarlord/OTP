@@ -4,12 +4,16 @@
  * Level 2: Individual Leg Detail
  */
 
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlanStore } from '../../store/planStore';
+import { useAppStore } from '../../store/appStore';
 import { LegCard } from './LegCard';
 import { LegDetailView } from './LegDetailView';
 import type { NormalizedItinerary, FareType } from '../../lib/types';
 import { formatDuration, formatFare, calculateTotalFare } from '../../lib/utils';
+import { Navigation, Loader2 } from 'lucide-react';
+import { Button } from './Button';
 
 interface RouteDetailsSheetProps {
   itinerary: NormalizedItinerary;
@@ -18,9 +22,23 @@ interface RouteDetailsSheetProps {
 
 export default function RouteDetailsSheet({ itinerary, fareType }: RouteDetailsSheetProps) {
   const { t, i18n } = useTranslation();
-  const { viewingLegIndex, setViewingLegIndex, focusedLegIndex, setFocusedLegIndex, setSelectedItineraryId } = usePlanStore();
+  const { 
+    viewingLegIndex, 
+    setViewingLegIndex, 
+    focusedLegIndex, 
+    setFocusedLegIndex, 
+    setSelectedItineraryId,
+    navigation,
+    startRealTimeNavigation,
+    stopRealTimeNavigation,
+    pauseNavigation,
+    resumeNavigation,
+  } = usePlanStore();
+  const { addToast } = useAppStore();
+  const [isStartingNavigation, setIsStartingNavigation] = useState(false);
 
   const totalFare = calculateTotalFare(itinerary, fareType);
+  const isNavigating = navigation.isNavigating && navigation.isRealTimeTracking;
 
   // Handle leg card click - navigate to leg detail
   const handleLegClick = (index: number) => {
@@ -40,6 +58,48 @@ export default function RouteDetailsSheet({ itinerary, fareType }: RouteDetailsS
     setSelectedItineraryId(undefined);
     setViewingLegIndex(null);
     setFocusedLegIndex(null);
+  };
+
+  // Handle start real-time navigation
+  const handleStartNavigation = async () => {
+    if (!navigator.geolocation) {
+      addToast({
+        type: 'error',
+        message: 'GPS is not supported on this device',
+      });
+      return;
+    }
+
+    setIsStartingNavigation(true);
+    try {
+      const success = await startRealTimeNavigation();
+      if (success) {
+        addToast({
+          type: 'success',
+          message: 'Real-time navigation started',
+        });
+      } else {
+        addToast({
+          type: 'error',
+          message: 'Failed to start GPS tracking. Please enable location permissions.',
+        });
+      }
+    } catch (error) {
+      addToast({
+        type: 'error',
+        message: 'Failed to start navigation',
+      });
+    } finally {
+      setIsStartingNavigation(false);
+    }
+  };
+
+  const handleStopNavigation = () => {
+    stopRealTimeNavigation();
+    addToast({
+      type: 'info',
+      message: 'Navigation stopped',
+    });
   };
 
   // If viewing a specific leg detail (Level 2)
@@ -96,6 +156,53 @@ export default function RouteDetailsSheet({ itinerary, fareType }: RouteDetailsS
             </div>
           )}
         </div>
+      </div>
+
+      {/* Navigation Control */}
+      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        {!isNavigating ? (
+          <Button
+            onClick={handleStartNavigation}
+            disabled={isStartingNavigation}
+            fullWidth
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+          >
+            {isStartingNavigation ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Starting Navigation...</span>
+              </>
+            ) : (
+              <>
+                <Navigation className="h-4 w-4" />
+                <span>Start Real-Time Navigation</span>
+              </>
+            )}
+          </Button>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
+              <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+              Navigation Active
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={navigation.isPaused ? resumeNavigation : pauseNavigation}
+                variant="secondary"
+                fullWidth
+              >
+                {navigation.isPaused ? 'Resume' : 'Pause'}
+              </Button>
+              <Button
+                onClick={handleStopNavigation}
+                variant="secondary"
+                fullWidth
+              >
+                Stop
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Leg Cards List */}
