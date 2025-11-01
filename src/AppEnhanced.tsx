@@ -11,6 +11,7 @@ import { AppStatusBar } from './components/ui/AppStatusBar';
 import { ToastContainer } from './components/ui/Toast';
 import { SkipLink } from './components/ui/SkipLink';
 import { HelpDialog } from './components/ui/HelpDialog';
+import { LocationTracker } from './components/LocationTracker';
 import { Home } from './pages/Home';
 import { LiveTracker } from './pages/LiveTracker';
 import { Favorites } from './pages/Favorites';
@@ -63,6 +64,9 @@ function AppContent() {
 
       {/* Help dialog */}
       <HelpDialog />
+
+      {/* Location tracking - Always active */}
+      <LocationTracker />
 
       {/* Mobile header with tabs - Only on Home page */}
       {isHomePage && (

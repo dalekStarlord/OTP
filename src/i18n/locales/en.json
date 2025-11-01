@@ -184,6 +184,86 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success"
+  },
+  "location": {
+    "tracking": "Location Tracking",
+    "startTracking": "Start Tracking",
+    "stopTracking": "Stop Tracking",
+    "active": "Tracking your location",
+    "inactive": "Location tracking off",
+    "error": "Unable to track location",
+    "accuracy": "Accuracy: {{meters}}m",
+    "autoCenter": "Auto-center map on location"
+  },
+  "plan": {
+    "planRoute": "Plan Route",
+    "planning": "Planning...",
+    "findRoutes": "Find Routes",
+    "sortBy": "Sort by",
+    "suggestedJourney": "Suggested Journey",
+    "suggestedJourneysMulti": "Suggested Journeys",
+    "clearAll": "Clear all",
+    "clearLocations": "Clear locations",
+    "options": "Options",
+    "foundRoutes": "Found {{count}} routes"
+  },
+  "fare": {
+    "regular": "Regular",
+    "discount": "Discount",
+    "regularFare": "Regular Fare",
+    "discounted": "Discounted (20% off)",
+    "fareType": "Fare Type",
+    "studentSeniorPwd": "Student/Senior/PWD",
+    "totalFare": "Total Fare:"
+  },
+  "route": {
+    "routeDetails": "Route Details",
+    "totalDuration": "Total Duration:",
+    "backToJourneys": "Back to journey list",
+    "back": "← Back",
+    "depart": "Depart",
+    "routes": "Routes",
+    "walk": "Walk",
+    "minWalk": "{{minutes}} min walk"
+  },
+  "locationErrors": {
+    "geolocationNotSupported": "Geolocation is not supported by this browser",
+    "unableToGetLocation": "Unable to get your location",
+    "locationBlocked": "Location access is blocked",
+    "iosSafariInstructions": "Go to Settings > Safari > Location Services, then turn it on and allow this website.",
+    "chromeInstructions": "Click the location icon 🔒 in the address bar, then allow location access.",
+    "firefoxInstructions": "Click the location icon in the address bar, then click \"Allow\".",
+    "safariInstructions": "Go to Safari > Settings for this Website > Location, then select \"Allow\".",
+    "genericInstructions": "Click the location icon in your browser's address bar and select \"Allow\".",
+    "locationUnavailable": "Location information unavailable. Please try again or enter a location manually.",
+    "locationTimeout": "Location request timed out. Please try again."
+  },
+  "controls": {
+    "pleaseSetLocations": "Please set both From and To locations",
+    "noRoutesDifferentTimes": "No routes found. Try different locations or times.",
+    "failedToPlan": "Failed to plan trip. Please try again.",
+    "planningError": "GTFS Planning error"
+  },
+  "search": {
+    "from": "From",
+    "to": "To",
+    "fromPlaceholder": "Your location or address",
+    "toPlaceholder": "Where to?",
+    "useCurrentLocation": "Use current location",
+    "recent": "Recent",
+    "favorites": "Favorites",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "swap": "Swap locations",
+    "near": "Near"
+  },
+  "appearance": {
+    "appearance": "Appearance"
+  },
+  "textSize": {
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large"
   }
 }
 

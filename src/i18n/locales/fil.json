@@ -11,18 +11,6 @@
     "contribute": "Mag-ulat",
     "settings": "Mga Setting"
   },
-  "search": {
-    "from": "Mula",
-    "to": "Papunta",
-    "fromPlaceholder": "Iyong lokasyon o address",
-    "toPlaceholder": "Saan pupunta?",
-    "useCurrentLocation": "Gamitin ang kasalukuyang lokasyon",
-    "recent": "Kamakailang Hanapin",
-    "favorites": "Mga Paborito",
-    "searching": "Naghahanap...",
-    "noResults": "Walang resulta",
-    "swap": "Palitan ang mga lokasyon"
-  },
   "quickPlaces": {
     "home": "Bahay",
     "work": "Trabaho",
@@ -184,6 +172,86 @@
     "loading": "Naglo-load...",
     "error": "May error",
     "success": "Tagumpay"
+  },
+  "location": {
+    "tracking": "Subaybay ng Lokasyon",
+    "startTracking": "Simulan ang Subaybay",
+    "stopTracking": "Itigil ang Subaybay",
+    "active": "Sinusubaybayan ang iyong lokasyon",
+    "inactive": "Naka-off ang subaybay ng lokasyon",
+    "error": "Hindi ma-subaybayan ang lokasyon",
+    "accuracy": "Katumpakan: {{meters}}m",
+    "autoCenter": "I-auto-center ang mapa sa lokasyon"
+  },
+  "plan": {
+    "planRoute": "Planuhin ang Ruta",
+    "planning": "Plano ang Ruta...",
+    "findRoutes": "Hanapin ang mga Ruta",
+    "sortBy": "I-sort ayon sa",
+    "suggestedJourney": "Iminumungkahing Biyahe",
+    "suggestedJourneysMulti": "Iminumungkahing mga Biyahe",
+    "clearAll": "Linisin lahat",
+    "clearLocations": "Linisin ang mga lokasyon",
+    "options": "Mga Opsyon",
+    "foundRoutes": "Natagpuan na {{count}} mga ruta"
+  },
+  "fare": {
+    "regular": "Regular",
+    "discount": "Diskwento",
+    "regularFare": "Regular Fare",
+    "discounted": "Diskwento (20% off)",
+    "fareType": "Uri ng Pamasahe",
+    "studentSeniorPwd": "Estudyante/Senior/PWD",
+    "totalFare": "Kabuuang Pamasahe:"
+  },
+  "route": {
+    "routeDetails": "Mga Detalye ng Ruta",
+    "totalDuration": "Kabuuang Tagal:",
+    "backToJourneys": "Bumalik sa listahan ng biyahe",
+    "back": "← Bumalik",
+    "depart": "Alis",
+    "routes": "Mga Ruta",
+    "walk": "Lakad",
+    "minWalk": "{{minutes}} min lakad"
+  },
+  "locationErrors": {
+    "geolocationNotSupported": "Hindi sinusuportahan ng browser ang geolocation",
+    "unableToGetLocation": "Hindi makuha ang iyong lokasyon",
+    "locationBlocked": "Naka-block ang access sa lokasyon",
+    "iosSafariInstructions": "Pumunta sa Settings > Safari > Location Services, pagkatapos buksan at payagan ang website na ito.",
+    "chromeInstructions": "I-click ang location icon 🔒 sa address bar, pagkatapos payagan ang access sa lokasyon.",
+    "firefoxInstructions": "I-click ang location icon sa address bar, pagkatapos i-click ang \"Allow\".",
+    "safariInstructions": "Pumunta sa Safari > Settings para sa Website na ito > Location, pagkatapos piliin ang \"Allow\".",
+    "genericInstructions": "I-click ang location icon sa address bar ng browser at piliin ang \"Allow\".",
+    "locationUnavailable": "Hindi available ang impormasyon sa lokasyon. Subukan ulit o maglagay ng lokasyon manual.",
+    "locationTimeout": "Timeout ang request sa lokasyon. Subukan ulit."
+  },
+  "controls": {
+    "pleaseSetLocations": "Mangyaring maglagay ng parehong From at To na lokasyon",
+    "noRoutesDifferentTimes": "Walang nahanap na ruta. Subukan ang ibang lokasyon o oras.",
+    "failedToPlan": "Hindi natukoy ang biyahe. Subukan ulit.",
+    "planningError": "GTFS Planning error"
+  },
+  "search": {
+    "from": "Mula",
+    "to": "Papunta",
+    "fromPlaceholder": "Iyong lokasyon o address",
+    "toPlaceholder": "Saan pupunta?",
+    "useCurrentLocation": "Gamitin ang kasalukuyang lokasyon",
+    "recent": "Kamakailang Hanapin",
+    "favorites": "Mga Paborito",
+    "searching": "Naghahanap...",
+    "noResults": "Walang resulta",
+    "swap": "Palitan ang mga lokasyon",
+    "near": "Malapit sa"
+  },
+  "appearance": {
+    "appearance": "Hitsura"
+  },
+  "textSize": {
+    "small": "Maliit",
+    "medium": "Katamtaman",
+    "large": "Malaki"
   }
 }
 

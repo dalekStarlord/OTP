@@ -108,7 +108,7 @@ export function RouteCard({
               
               // Display priority: vehicleName > lineName > mode
               const displayName = leg.mode === 'WALK'
-                ? 'Walk'
+                ? t('route.walk')
                 : (leg.vehicleName || leg.lineName?.split('-')[0] || leg.mode.slice(0, 4));
               
               return (
@@ -194,7 +194,7 @@ export function RouteCard({
             
             {totalWalkingTime > 0 && (
               <div className="text-xs text-gray-600 dark:text-gray-400">
-                {Math.round(totalWalkingTime / 60)} min walk
+                {t('route.minWalk', { minutes: Math.round(totalWalkingTime / 60) })}
               </div>
             )}
           </div>
@@ -259,7 +259,7 @@ export function RouteCard({
             
             // Display priority: vehicleName > lineName > mode
             const displayName = leg.mode === 'WALK'
-              ? 'Walk'
+              ? t('route.walk')
               : (leg.vehicleName || leg.lineName || t(`modes.${leg.mode.toLowerCase()}`));
             
             return (

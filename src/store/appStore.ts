@@ -13,6 +13,7 @@ import type {
   ToastMessage,
   RouteFilters,
 } from '../lib/enhanced-types';
+import type { Coord } from '../lib/types';
 import { STORAGE_KEYS } from '../lib/constants';
 import { generateId, isOnline } from '../lib/utils';
 
@@ -60,6 +61,18 @@ interface AppStore {
   setHelpDialogOpen: (open: boolean) => void;
   firstVisit: boolean;
   markFirstVisitComplete: () => void;
+
+  // Location tracking state
+  currentLocation: Coord | null;
+  isTrackingLocation: boolean;
+  locationAccuracy: number | null;
+  locationWatchId: number | null;
+  autoCenterMap: boolean;
+  setCurrentLocation: (location: Coord | null) => void;
+  setLocationAccuracy: (accuracy: number | null) => void;
+  setLocationWatchId: (watchId: number | null) => void;
+  setIsTrackingLocation: (isTracking: boolean) => void;
+  setAutoCenterMap: (autoCenter: boolean) => void;
 }
 
 const defaultPreferences: UserPreferences = {
@@ -224,6 +237,18 @@ export const useAppStore = create<AppStore>()(
       setHelpDialogOpen: (open) => set({ helpDialogOpen: open }),
       firstVisit: true,
       markFirstVisitComplete: () => set({ firstVisit: false }),
+
+      // Location tracking state
+      currentLocation: null,
+      isTrackingLocation: false,
+      locationAccuracy: null,
+      locationWatchId: null,
+      autoCenterMap: true,
+      setCurrentLocation: (location) => set({ currentLocation: location }),
+      setLocationAccuracy: (accuracy) => set({ locationAccuracy: accuracy }),
+      setLocationWatchId: (watchId) => set({ locationWatchId: watchId }),
+      setIsTrackingLocation: (isTracking) => set({ isTrackingLocation: isTracking }),
+      setAutoCenterMap: (autoCenter) => set({ autoCenterMap: autoCenter }),
     }),
     {
       name: STORAGE_KEYS.userPreferences,

@@ -224,8 +224,8 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
                   onClick={handleClear}
                   disabled={!from && !to}
                   className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  aria-label="Clear locations"
-                  title="Clear all locations"
+                  aria-label={t('plan.clearLocations')}
+                  title={t('plan.clearAll')}
                 >
                   <svg 
                     className="h-4 w-4 text-red-600 dark:text-red-400" 
@@ -266,7 +266,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
                     {/* Sort options */}
                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                        Sort by
+                        {t('plan.sortBy')}
                       </label>
                       <div className="flex flex-col sm:flex-row gap-2">
                         {SORT_OPTIONS.map((option) => (
@@ -298,7 +298,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
                 fullWidth
                 size="lg"
               >
-                Plan Route
+                {t('plan.planRoute')}
               </Button>
             </motion.div>
           ) : (
@@ -313,7 +313,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
               {/* Appearance */}
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                  Appearance
+                  {t('appearance.appearance')}
                 </h2>
 
                 {/* Theme */}

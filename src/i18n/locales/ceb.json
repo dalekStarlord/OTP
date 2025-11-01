@@ -11,18 +11,6 @@
     "contribute": "Taho",
     "settings": "Mga Setting"
   },
-  "search": {
-    "from": "Gikan",
-    "to": "Paingon",
-    "fromPlaceholder": "Imong lokasyon o address",
-    "toPlaceholder": "Asa man?",
-    "useCurrentLocation": "Gamita ang karon nga lokasyon",
-    "recent": "Bag-ong Pangita",
-    "favorites": "Mga Paborito",
-    "searching": "Nagpangita...",
-    "noResults": "Walay resulta",
-    "swap": "Ilisi ang mga lokasyon"
-  },
   "quickPlaces": {
     "home": "Balay",
     "work": "Trabaho",
@@ -184,6 +172,86 @@
     "loading": "Nagload...",
     "error": "May sayop",
     "success": "Malampuson"
+  },
+  "location": {
+    "tracking": "Subaybay sa Lokasyon",
+    "startTracking": "Sugdi ang Subaybay",
+    "stopTracking": "Hunong ang Subaybay",
+    "active": "Gisubaybayan ang imong lokasyon",
+    "inactive": "Gipundo ang subaybay sa lokasyon",
+    "error": "Dili masubaybayan ang lokasyon",
+    "accuracy": "Katukma: {{meters}}m",
+    "autoCenter": "I-auto-center ang mapa sa lokasyon"
+  },
+  "plan": {
+    "planRoute": "Plano sa Ruta",
+    "planning": "Nagplano sa Ruta...",
+    "findRoutes": "Pangita ang mga Ruta",
+    "sortBy": "I-sort sumala sa",
+    "suggestedJourney": "Gisugyot nga Biyahe",
+    "suggestedJourneysMulti": "Gisugyot nga mga Biyahe",
+    "clearAll": "Limpyoha tanan",
+    "clearLocations": "Limpyoha ang mga lokasyon",
+    "options": "Mga Opsyon",
+    "foundRoutes": "Nakit-an {{count}} nga mga ruta"
+  },
+  "fare": {
+    "regular": "Regular",
+    "discount": "Diskwento",
+    "regularFare": "Regular Fare",
+    "discounted": "Diskwento (20% off)",
+    "fareType": "Matang sa Plete",
+    "studentSeniorPwd": "Estudyante/Senior/PWD",
+    "totalFare": "Tibuok Plete:"
+  },
+  "route": {
+    "routeDetails": "Mga Detalye sa Ruta",
+    "totalDuration": "Tibuok Tagal:",
+    "backToJourneys": "Balik sa listahan sa biyahe",
+    "back": "← Balik",
+    "depart": "Asa man?",
+    "routes": "Mga Ruta",
+    "walk": "Lakaw",
+    "minWalk": "{{minutes}} min lakaw"
+  },
+  "locationErrors": {
+    "geolocationNotSupported": "Dili suportahan sa browser ang geolocation",
+    "unableToGetLocation": "Dili makuha ang imong lokasyon",
+    "locationBlocked": "Gi-block ang access sa lokasyon",
+    "iosSafariInstructions": "Adto sa Settings > Safari > Location Services, dayon ablihi ug tugoti kini nga website.",
+    "chromeInstructions": "I-click ang location icon 🔒 sa address bar, dayon tugoti ang access sa lokasyon.",
+    "firefoxInstructions": "I-click ang location icon sa address bar, dayon i-click ang \"Allow\".",
+    "safariInstructions": "Adto sa Safari > Settings para sa Website > Location, dayon pilia ang \"Allow\".",
+    "genericInstructions": "I-click ang location icon sa address bar sa browser ug pilia ang \"Allow\".",
+    "locationUnavailable": "Dili available ang impormasyon sa lokasyon. Sulayi pag-usab o magbutang ug lokasyon manual.",
+    "locationTimeout": "Na-timeout ang request sa lokasyon. Sulayi pag-usab."
+  },
+  "controls": {
+    "pleaseSetLocations": "Palihug magbutang ug parehong From ug To nga lokasyon",
+    "noRoutesDifferentTimes": "Walay nakit-an nga ruta. Sulayi ang lain nga lokasyon o oras.",
+    "failedToPlan": "Wala matukoy ang biyahe. Sulayi pag-usab.",
+    "planningError": "GTFS Planning error"
+  },
+  "search": {
+    "from": "Gikan",
+    "to": "Paingon",
+    "fromPlaceholder": "Imong lokasyon o address",
+    "toPlaceholder": "Asa man?",
+    "useCurrentLocation": "Gamita ang karon nga lokasyon",
+    "recent": "Bag-ong Pangita",
+    "favorites": "Mga Paborito",
+    "searching": "Nagpangita...",
+    "noResults": "Walay resulta",
+    "swap": "Ilisi ang mga lokasyon",
+    "near": "Duol sa"
+  },
+  "appearance": {
+    "appearance": "Dagway"
+  },
+  "textSize": {
+    "small": "Gamay",
+    "medium": "Katamtaman",
+    "large": "Dako"
   }
 }
 

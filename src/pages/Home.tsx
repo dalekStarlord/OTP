@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { MapLegend } from '../components/ui/MapLegend';
 import RouteDetailsSheet from '../components/ui/RouteDetailsSheet';
 import { UnifiedSidebar } from '../components/ui/UnifiedSidebar';
+import { LocationToggle } from '../components/ui/LocationToggle';
 import { planTripGtfs, checkAvailableRoutes, checkAvailableStops, testSimpleRoute, checkRouteTrips, checkServiceDates, checkPlanSchema } from '../lib/otp';
 import { SORT_OPTIONS } from '../lib/constants';
 import { ArrowLeftRight, SlidersHorizontal } from 'lucide-react';
@@ -103,7 +104,7 @@ export function Home() {
 
       addToast({
         type: 'success',
-        message: `Found ${results.length} routes`,
+        message: t('plan.foundRoutes', { count: results.length }),
       });
     } catch (error) {
       console.error('Route planning error:', error);
@@ -160,7 +161,7 @@ export function Home() {
                   fullWidth
                 className="py-1.5 text-sm"
                 >
-                  Plan Route
+                  {t('plan.planRoute')}
                 </Button>
             </div>
           </div>
@@ -170,11 +171,13 @@ export function Home() {
         {(!itineraries || itineraries.length === 0) ? (
           <div className="flex-1 relative overflow-hidden z-0">
             <MapView hoveredItineraryId={hoveredItineraryId} />
+            <LocationToggle />
           </div>
         ) : (
           <>
             <div className="relative flex-shrink-0 overflow-hidden z-0 h-[35vh]">
               <MapView hoveredItineraryId={hoveredItineraryId} />
+              <LocationToggle />
             </div>
 
             {/* Search & Results Section - scrollable bottom area */}
@@ -202,7 +205,7 @@ export function Home() {
               {/* Journey Results Header */}
               <div className="flex items-center justify-between">
                 <h2 className="font-bold text-base text-gray-900 dark:text-gray-100">
-                  {sortedItineraries.length} Suggested {sortedItineraries.length === 1 ? 'Journey' : 'Journeys'}
+                  {sortedItineraries.length} {sortedItineraries.length === 1 ? t('plan.suggestedJourney') : t('plan.suggestedJourneysMulti')}
                 </h2>
               </div>
 
@@ -227,7 +230,7 @@ export function Home() {
                     className="border-2 border-gray-200 dark:border-gray-600 rounded-lg p-3"
                   >
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-2">
-                      Sort by
+                      {t('plan.sortBy')}
                     </label>
                     <div className="flex flex-col gap-2">
                       {SORT_OPTIONS.map((option) => (
@@ -265,7 +268,7 @@ export function Home() {
                       : "border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-blue-300"
                   )}
                 >
-                  <span className="font-medium text-[11px]">Regular</span>
+                  <span className="font-medium text-[11px]">{t('fare.regular')}</span>
                 </button>
                 <button
                   type="button"
@@ -279,7 +282,7 @@ export function Home() {
                       : "border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-green-300"
                   )}
                 >
-                  <span className="font-medium text-[11px]">Discount</span>
+                  <span className="font-medium text-[11px]">{t('fare.discount')}</span>
                 </button>
               </div>
 
@@ -320,6 +323,9 @@ export function Home() {
         {/* Map area */}
         <div className="flex-1 relative min-h-[45vh] lg:h-auto">
           <MapView hoveredItineraryId={hoveredItineraryId} />
+          
+          {/* Location toggle button */}
+          <LocationToggle />
           
           {/* Map legend (desktop) */}
           <div className="hidden lg:block absolute bottom-4 right-4 z-20">

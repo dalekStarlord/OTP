@@ -67,14 +67,14 @@ export default function RouteDetailsSheet({ itinerary, fareType }: RouteDetailsS
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <h2 className="font-bold text-base text-gray-900 dark:text-gray-100">
-          Route Details
+          {t('route.routeDetails')}
         </h2>
         <button
           onClick={handleBackToJourneys}
           className="text-sm text-blue-600 dark:text-blue-400 font-medium px-3 py-1.5 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-          aria-label="Back to journey list"
+          aria-label={t('route.backToJourneys')}
         >
-          ← Back
+          {t('route.back')}
         </button>
       </div>
 
@@ -82,14 +82,14 @@ export default function RouteDetailsSheet({ itinerary, fareType }: RouteDetailsS
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <div className="flex items-center justify-between text-sm">
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Total Duration:</span>
+            <span className="text-gray-600 dark:text-gray-400">{t('route.totalDuration')}</span>
             <span className="font-bold text-gray-900 dark:text-gray-100 ml-2">
               {formatDuration(itinerary.duration, i18n.language)}
             </span>
           </div>
           {totalFare > 0 && (
             <div>
-              <span className="text-gray-600 dark:text-gray-400">Total Fare:</span>
+              <span className="text-gray-600 dark:text-gray-400">{t('fare.totalFare')}</span>
               <span className="font-bold text-gray-900 dark:text-gray-100 ml-2">
                 ₱{formatFare(totalFare)}
               </span>

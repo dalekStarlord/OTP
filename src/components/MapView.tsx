@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { usePlanStore } from '../store/planStore';
+import { useAppStore } from '../store/appStore';
 import { decodePolyline, getLegStyle, getHighlightedLegStyle, getRouteColor } from '../lib/polyline';
 import type { NormalizedItinerary } from '../lib/types';
 
@@ -28,11 +29,25 @@ const toIcon = L.divIcon({
   iconAnchor: [11, 11],
 });
 
+// Simulated navigation marker (for route simulation)
 const userIcon = L.divIcon({
   className: 'custom-marker',
   html: '<div style="background-color: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 4px solid white; box-shadow: 0 2px 8px rgba(59,130,246,0.5); position: relative;"><div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background-color: white; border-radius: 50%;"></div></div>',
   iconSize: [28, 28],
   iconAnchor: [14, 14],
+});
+
+// Real-time GPS location marker (pulsing blue dot)
+const realTimeLocationIcon = L.divIcon({
+  className: 'custom-marker gps-marker',
+  html: `<div style="position: relative;">
+      <div class="gps-pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background-color: rgba(59, 130, 246, 0.3); border-radius: 50%; animation: pulse 2s infinite;"></div>
+      <div style="position: relative; background-color: #3b82f6; width: 24px; height: 24px; border-radius: 50%; border: 4px solid white; box-shadow: 0 2px 8px rgba(59,130,246,0.6); z-index: 1;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background-color: white; border-radius: 50%;"></div>
+      </div>
+    </div>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
 });
 
 type MapViewProps = {
@@ -41,6 +56,7 @@ type MapViewProps = {
 
 export default function MapView({ hoveredItineraryId }: MapViewProps) {
   const { from, to, itineraries, selectedItineraryId, navigation, focusedLegIndex } = usePlanStore();
+  const { currentLocation, isTrackingLocation, locationAccuracy } = useAppStore();
 
   // Calculate user position based on navigation state
   const userPosition = React.useMemo(() => {
@@ -80,6 +96,7 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
         <MapBoundsHandler />
         <LegFocusHandler />
         <NavigationSimulator />
+        <MapAutoCenter />
         
         {/* Render polylines ONLY for selected itinerary */}
         {itineraries?.map((itinerary, index) => {
@@ -117,12 +134,38 @@ export default function MapView({ hoveredItineraryId }: MapViewProps) {
             zIndexOffset={1000}
           />
         )}
+        {/* Simulated navigation marker (when navigating a route) */}
         {userPosition && navigation.isNavigating && (
           <Marker 
             position={userPosition} 
             icon={userIcon}
             zIndexOffset={2000}
           />
+        )}
+        
+        {/* Real-time GPS location marker */}
+        {currentLocation && isTrackingLocation && (
+          <>
+            <Marker 
+              position={[currentLocation.lat, currentLocation.lon]} 
+              icon={realTimeLocationIcon}
+              zIndexOffset={3000}
+            />
+            {/* Accuracy circle */}
+            {locationAccuracy && locationAccuracy > 0 && (
+              <Circle
+                center={[currentLocation.lat, currentLocation.lon]}
+                radius={locationAccuracy}
+                pathOptions={{
+                  color: '#3b82f6',
+                  fillColor: '#3b82f6',
+                  fillOpacity: 0.1,
+                  weight: 1,
+                  opacity: 0.5,
+                }}
+              />
+            )}
+          </>
         )}
       </MapContainer>
     </div>
@@ -179,17 +222,16 @@ function LegFocusHandler() {
     if (focusedLeg.polyline) {
       const coords = decodePolyline(focusedLeg.polyline);
       if (coords.length > 0) {
-        // Filter out any invalid coordinates
-        const validCoords = coords.filter(c => 
-          c && 
-          typeof c.lat === 'number' && 
-          typeof c.lon === 'number' && 
-          !isNaN(c.lat) && 
-          !isNaN(c.lon)
+        // Filter out any invalid coordinates (coords are [lat, lon] tuples)
+        const validCoords = coords.filter(([lat, lon]) => 
+          typeof lat === 'number' && 
+          typeof lon === 'number' && 
+          !isNaN(lat) && 
+          !isNaN(lon)
         );
         
         if (validCoords.length > 0) {
-          const bounds = L.latLngBounds(validCoords.map(c => [c.lat, c.lon]));
+          const bounds = L.latLngBounds(validCoords);
           map.fitBounds(bounds, {
             padding: [50, 50],
             maxZoom: 16,
@@ -374,6 +416,68 @@ function NavigationSimulator() {
       isNavigatingRef.current = false;
     };
   }, [navigation.isNavigating, navigation.isPaused, selectedItineraryId]);
+
+  return null;
+}
+
+// Component to auto-center map on user location when tracking
+function MapAutoCenter() {
+  const map = useMap();
+  const { currentLocation, isTrackingLocation, autoCenterMap } = useAppStore();
+  const userPannedRef = useRef(false);
+  const lastCenteredRef = useRef<{ lat: number; lon: number } | null>(null);
+
+  useEffect(() => {
+    // Reset user panned flag when tracking stops
+    if (!isTrackingLocation) {
+      userPannedRef.current = false;
+      lastCenteredRef.current = null;
+    }
+  }, [isTrackingLocation]);
+
+  useEffect(() => {
+    if (!currentLocation || !isTrackingLocation || !autoCenterMap) {
+      return;
+    }
+
+    // Don't auto-center if user manually panned
+    if (userPannedRef.current) {
+      return;
+    }
+
+    // Check if location has changed significantly (more than 50m)
+    const currentPos = { lat: currentLocation.lat, lon: currentLocation.lon };
+    if (lastCenteredRef.current) {
+      const latDiff = Math.abs(currentPos.lat - lastCenteredRef.current.lat);
+      const lonDiff = Math.abs(currentPos.lon - lastCenteredRef.current.lon);
+      // Rough distance check (1 degree ≈ 111km, so 50m ≈ 0.00045 degrees)
+      if (latDiff < 0.00045 && lonDiff < 0.00045) {
+        return; // Location hasn't changed enough
+      }
+    }
+
+    // Center map on user location
+    map.setView([currentLocation.lat, currentLocation.lon], map.getZoom(), {
+      animate: true,
+      duration: 0.5,
+    });
+
+    lastCenteredRef.current = currentPos;
+  }, [currentLocation, isTrackingLocation, autoCenterMap, map]);
+
+  // Track user panning to disable auto-center
+  useEffect(() => {
+    const handleDragStart = () => {
+      if (isTrackingLocation && autoCenterMap) {
+        userPannedRef.current = true;
+      }
+    };
+
+    map.on('dragstart', handleDragStart);
+    return () => {
+      map.off('dragstart', handleDragStart);
+    };
+  }, [map, isTrackingLocation, autoCenterMap]);
 
   return null;
 }

@@ -89,7 +89,7 @@ export function EnhancedSearchBar({
       console.error('Geolocation is not supported by this browser');
       addToast({
         type: 'error',
-        message: 'Geolocation is not supported by this browser',
+        message: t('locationErrors.geolocationNotSupported'),
       });
       return;
     }
@@ -112,11 +112,11 @@ export function EnhancedSearchBar({
         console.error('Geolocation error:', error);
         setStatus({ gpsLock: false });
         
-        let errorMessage = 'Unable to get your location';
+        let errorMessage = t('locationErrors.unableToGetLocation');
         let instructions = '';
         
         if (error.code === error.PERMISSION_DENIED) {
-          errorMessage = 'Location access is blocked';
+          errorMessage = t('locationErrors.locationBlocked');
           
           // Provide browser-specific instructions
           const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -125,20 +125,20 @@ export function EnhancedSearchBar({
           const isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
           
           if (isIOS && isSafari) {
-            instructions = 'Go to Settings > Safari > Location Services, then turn it on and allow this website.';
+            instructions = t('locationErrors.iosSafariInstructions');
           } else if (isChrome) {
-            instructions = 'Click the location icon 🔒 in the address bar, then allow location access.';
+            instructions = t('locationErrors.chromeInstructions');
           } else if (isFirefox) {
-            instructions = 'Click the location icon in the address bar, then click "Allow".';
+            instructions = t('locationErrors.firefoxInstructions');
           } else if (isSafari) {
-            instructions = 'Go to Safari > Settings for this Website > Location, then select "Allow".';
+            instructions = t('locationErrors.safariInstructions');
           } else {
-            instructions = 'Click the location icon in your browser\'s address bar and select "Allow".';
+            instructions = t('locationErrors.genericInstructions');
           }
         } else if (error.code === error.POSITION_UNAVAILABLE) {
-          errorMessage = 'Location information unavailable. Please try again or enter a location manually.';
+          errorMessage = t('locationErrors.locationUnavailable');
         } else if (error.code === error.TIMEOUT) {
-          errorMessage = 'Location request timed out. Please try again.';
+          errorMessage = t('locationErrors.locationTimeout');
         }
         
         addToast({
@@ -396,7 +396,7 @@ export function EnhancedSearchBar({
                       <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{result.address}</div>
                       {result.landmark && (
                         <div className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 mt-0.5 truncate">
-                          Near {result.landmark}
+                          {t('search.near')} {result.landmark}
                         </div>
                       )}
                     </div>
