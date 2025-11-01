@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { SORT_OPTIONS } from '../../lib/constants';
 import { Sun, Moon, Languages, Type } from 'lucide-react';
+import { planTripGtfs } from '../../lib/otp';
 
 interface UnifiedSidebarProps {
   pickingMode: 'from' | 'to' | null;
@@ -38,7 +39,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
     clear,
     setItineraries
   } = usePlanStore();
-  const { filters, setFilters, preferences, setPreferences, addToast, addRecentSearch } = useAppStore();
+  const { filters, setFilters, preferences, setPreferences, addToast, addRecentSearch, setStatus } = useAppStore();
   
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState<'plan' | 'settings'>('plan');
@@ -99,10 +100,9 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
       return;
     }
 
+    setStatus({ computing: true });
+
     try {
-      // Import the function dynamically to avoid issues
-      const { planTripGtfs } = await import('../../lib/otp');
-      
       const results = await planTripGtfs(
         from,
         to,
@@ -130,6 +130,8 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
         type: 'error',
         message: t('errors.routeFailed'),
       });
+    } finally {
+      setStatus({ computing: false });
     }
   };
 
