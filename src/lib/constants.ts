@@ -43,7 +43,7 @@ export const TRANSPORT_MODES = [
 export const SORT_OPTIONS = [
   { id: 'fastest', nameKey: 'sort.fastest', field: 'duration' },
   { id: 'cheapest', nameKey: 'sort.cheapest', field: 'fare' },
-  { id: 'fewestTransfers', nameKey: 'sort.fewestTransfers', field: 'transfers' },
+  // { id: 'fewestTransfers', nameKey: 'sort.fewestTransfers', field: 'transfers' },
 ];
 
 // Status messages display duration
