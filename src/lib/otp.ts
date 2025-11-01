@@ -1,8 +1,14 @@
 import { GraphQLClient } from 'graphql-request';
 import type { Coord, NormalizedItinerary, NormalizedLeg } from './types';
 
-const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://e6833c24d422.ngrok-free.app';
-const GTFS_URL = import.meta.env.VITE_OTP_GTFS_GQL || `${OTP_BASE}/otp/gtfs/v1`;
+// Use Vercel proxy in production, direct ngrok in development
+const isProduction = import.meta.env.PROD;
+const NGROK_OTP_URL = import.meta.env.VITE_OTP_BASE || 'https://e6833c24d422.ngrok-free.app';
+const USE_PROXY = import.meta.env.VITE_USE_PROXY !== 'false'; // Default to true
+
+const GTFS_URL = isProduction && USE_PROXY 
+  ? '/api/otp'  // Use Vercel proxy in production
+  : `${NGROK_OTP_URL}/otp/gtfs/v1`;  // Direct ngrok in dev
 
 export const gtfsClient = new GraphQLClient(GTFS_URL, {
   headers: { 
@@ -10,6 +16,10 @@ export const gtfsClient = new GraphQLClient(GTFS_URL, {
     'ngrok-skip-browser-warning': 'true'
   },
 });
+
+// Log the configured URL for debugging
+console.log('🔗 OTP API Endpoint:', GTFS_URL);
+console.log('🔧 Mode:', isProduction ? (USE_PROXY ? 'Production + Proxy' : 'Production + Direct') : 'Development');
 
 // ===== GTFS V1 =====
 
@@ -88,7 +98,9 @@ export async function planTripGtfs(
   };
 
   try {
+    console.log('🚀 GTFS Request:', { from: `${variables.fromLat},${variables.fromLon}`, to: `${variables.toLat},${variables.toLon}`, numItineraries: variables.numItineraries });
     const data: any = await gtfsClient.request(GTFS_PLAN_QUERY, variables);
+    console.log('✅ GTFS Response received');
     return normalizeGtfs(data);
   } catch (error) {
     console.error('❌ GTFS trip planning error:', error);
@@ -146,6 +158,11 @@ function calculateFareProducts(distanceMeters: number, routeId: string): any[] {
 
 function normalizeGtfs(data: any): NormalizedItinerary[] {
   const itineraries = data?.plan?.itineraries || [];
+  
+  console.log('🔍 OTP returned', itineraries.length, 'itineraries');
+  if (itineraries.length === 0) {
+    console.warn('⚠️ No itineraries found in OTP response. Raw data:', data);
+  }
   
   return itineraries.map((itinerary: any, idx: number) => {
     const legs: NormalizedLeg[] = (itinerary.legs || []).map((leg: any) => {

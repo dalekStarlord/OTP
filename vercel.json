@@ -4,6 +4,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/otp/(.*)",
+      "destination": "/api/otp-proxy.ts"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

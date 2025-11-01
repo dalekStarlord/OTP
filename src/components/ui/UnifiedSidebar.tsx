@@ -126,9 +126,10 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
       });
     } catch (error) {
       console.error('Route planning error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       addToast({
         type: 'error',
-        message: t('errors.routeFailed'),
+        message: errorMessage || t('errors.routeFailed'),
       });
     } finally {
       setStatus({ computing: false });
