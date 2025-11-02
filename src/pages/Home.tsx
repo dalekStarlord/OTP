@@ -144,7 +144,7 @@ export function Home() {
                   onClick={handleSwap}
                   disabled={!from && !to}
                   aria-label="Swap locations"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-blue-600 text-white shadow-md flex items-center justify-center disabled:opacity-50 hover:bg-blue-700 transition-colors z-10 pointer-events-auto"
+                  className="absolute right-2 top-[50%] -translate-y-[39%] h-8 w-8 rounded-full bg-blue-600 text-white shadow-md flex items-center justify-center disabled:opacity-50 hover:bg-blue-700 transition-colors z-10 pointer-events-auto"
                 >
                   <ArrowLeftRight className="h-3.5 w-3.5" />
                 </button>

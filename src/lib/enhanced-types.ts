@@ -2,7 +2,7 @@
  * Enhanced type definitions for CDO Jeepney Planner
  */
 
-import { Coord, NormalizedItinerary, NormalizedLeg } from './types';
+import { Coord, NormalizedItinerary } from './types';
 
 // User preferences
 export interface UserPreferences {

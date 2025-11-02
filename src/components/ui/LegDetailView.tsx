@@ -7,6 +7,7 @@ import { cn, formatDuration, formatFare, formatDistance, getModeIcon, getDisplay
 import type { NormalizedLeg, FareType } from '../../lib/types';
 import * as LucideIcons from 'lucide-react';
 import { useState, useEffect } from 'react';
+import jeepneyIcon from '../../assets/jeepney-icon.svg';
 
 interface LegDetailViewProps {
   leg: NormalizedLeg;
@@ -15,7 +16,7 @@ interface LegDetailViewProps {
   onBack: () => void;
 }
 
-export function LegDetailView({ leg, legIndex, fareType, onBack }: LegDetailViewProps) {
+export function LegDetailView({ leg, fareType, onBack }: LegDetailViewProps) {
   const IconComponent = (LucideIcons as any)[
     getModeIcon(leg.mode).charAt(0).toUpperCase() + getModeIcon(leg.mode).slice(1)
   ] || LucideIcons.Circle;
@@ -80,7 +81,8 @@ export function LegDetailView({ leg, legIndex, fareType, onBack }: LegDetailView
         <div className="p-6 text-white">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <IconComponent className="h-6 w-6" aria-hidden="true" />
+            {leg.mode === 'JEEPNEY' && <img src={`${jeepneyIcon}`} alt={leg.mode} className="h-6 w-6" aria-hidden="true" />}
+            {leg.mode === 'WALK' && <IconComponent className="h-6 w-6" aria-hidden="true" />}
             </div>
             <div className="flex-1">
               <div className="font-bold text-lg">{displayName}</div>

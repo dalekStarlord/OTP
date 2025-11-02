@@ -4,13 +4,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import { getLiveVehicles } from '../lib/api';
 import { useAppStore } from '../store/appStore';
 import type { LiveVehicle } from '../lib/enhanced-types';
 import { CDO_CENTER } from '../lib/constants';
-import { getRelativeTime, getModeColor } from '../lib/utils';
+import { getRelativeTime } from '../lib/utils';
 import { Bus, Navigation, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import 'leaflet/dist/leaflet.css';

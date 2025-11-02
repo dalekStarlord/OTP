@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { submitContribution } from '../lib/api';
 import { useAppStore } from '../store/appStore';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
 import { MapPin, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

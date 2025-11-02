@@ -5,7 +5,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, MapPin, X, Loader2, Navigation, Clock, Star, MapPinned } from 'lucide-react';
+import { Search, MapPin, X, Loader2, Navigation, Clock, Star } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAppStore } from '../../store/appStore';
 import { usePlanStore } from '../../store/planStore';
@@ -33,7 +33,6 @@ export function EnhancedSearchBar({
   const { t } = useTranslation();
   const { recentSearches, savedPlaces, setStatus, addToast } = useAppStore();
   const { pickingMode, setPickingMode } = usePlanStore();
-  const isPicking = pickingMode === type;
   const [query, setQuery] = useState(value?.name || '');
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -104,7 +103,7 @@ export function EnhancedSearchBar({
           name: t('search.useCurrentLocation'),
         };
         onChange(coord);
-        setQuery(coord.name);
+        setQuery(coord.name || '');
         setFocused(false);
         setStatus({ gpsLock: false });
       },
@@ -176,19 +175,6 @@ export function EnhancedSearchBar({
     inputRef.current?.focus();
     // Keep picking mode for this field so user can pick on map after clearing
     setPickingMode(type);
-  };
-
-  const handleMapPick = () => {
-    const { pickingMode: currentMode } = usePlanStore.getState();
-    
-    if (currentMode === type) {
-      // Toggle off if already picking this field
-      setPickingMode(null);
-    } else {
-      // Activate picking mode for this field
-      setPickingMode(type);
-      setFocused(false);
-    }
   };
 
   // Keyboard navigation

@@ -3,8 +3,9 @@
  * All data comes from real services (Photon API for geocoding, OTP for routing)
  */
 
-import { geocodeSearch, GeocodeSuggestion } from './geocode';
-import type { GeocodeResult, LiveVehicle, ServiceAdvisory, ContributionReport, Coord } from './enhanced-types';
+import { geocodeSearch } from './geocode';
+import type { GeocodeResult, LiveVehicle, ServiceAdvisory, ContributionReport } from './enhanced-types';
+import type { Coord } from './types';
 
 /**
  * Geocode search using Nominatim OSM
@@ -85,14 +86,7 @@ function formatDisplayName(props: any): string {
  * Get live vehicle positions
  * TODO: Replace with actual GTFS-RT feed when available
  */
-export async function getLiveVehicles(
-  bounds?: {
-    north: number;
-    south: number;
-    east: number;
-    west: number;
-  }
-): Promise<LiveVehicle[]> {
+export async function getLiveVehicles(): Promise<LiveVehicle[]> {
   // TODO: Implement real GTFS-RT integration
   // For now, return empty array
   console.warn('Live vehicle tracking not yet implemented - needs GTFS-RT feed');

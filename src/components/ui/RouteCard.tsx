@@ -10,6 +10,7 @@ import type { NormalizedItinerary, FareType } from '../../lib/types';
 import { motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 import { getRouteColor } from '../../lib/polyline';
+import jeepneyIcon from '../../assets/jeepney-icon.svg';
 
 interface RouteCardProps {
   itinerary: NormalizedItinerary;
@@ -50,7 +51,6 @@ export function RouteCard({
   const startTime = new Date(itinerary.startTime);
   const endTime = new Date(itinerary.endTime);
   const walkingLegs = itinerary.legs.filter(leg => leg.mode === 'WALK');
-  const totalWalkingDistance = walkingLegs.reduce((sum, leg) => sum + leg.distance, 0);
   const totalWalkingTime = walkingLegs.reduce((sum, leg) => sum + leg.duration, 0);
 
   return (
@@ -67,8 +67,8 @@ export function RouteCard({
       )}
       style={{
         borderColor: selected ? routeColor : undefined,
-        ringColor: selected ? routeColor : undefined,
-      }}
+        '--tw-ring-color': selected ? routeColor : undefined,
+      } as React.CSSProperties}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -82,21 +82,17 @@ export function RouteCard({
       aria-pressed={selected}
     >
       {/* Route color indicator bar */}
-      <div 
+      {/* <div 
         className="absolute left-0 top-0 bottom-0 w-1"
         style={{ backgroundColor: routeColor }}
-      />
+      /> */}
       
       <div className="p-3 pl-4">
-        {/* Mobile-optimized layout (Sakay style) */}
+        {/* Mobile-optimized layout */}
         <div className="lg:hidden space-y-3">
           {/* Mode icons row */}
           <div className="flex items-center gap-2">
             {transitLegs.map((leg, index) => {
-              const IconComponent = (LucideIcons as any)[
-                getModeIcon(leg.mode).charAt(0).toUpperCase() + 
-                getModeIcon(leg.mode).slice(1)
-              ] || LucideIcons.Circle;
               
               const modeColors: Record<string, string> = {
                 'JEEPNEY': 'bg-blue-500',
@@ -117,7 +113,7 @@ export function RouteCard({
                     'w-12 h-12 rounded-full flex items-center justify-center text-white',
                     modeColors[leg.mode] || 'bg-gray-500'
                   )}>
-                    <IconComponent className="h-6 w-6" aria-hidden="true" />
+                  {leg.mode === 'JEEPNEY' && <img src={`${jeepneyIcon}`} alt={leg.mode} className="h-8 w-8" aria-hidden="true" style={{ filter: 'invert(1)' }} />}
                   </div>
                   <span className="text-[9px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
                     {displayName}
@@ -157,7 +153,7 @@ export function RouteCard({
                         modeColors[leg.mode] || 'bg-gray-400'
                       )}
                       style={{
-                        left: `${(leg.startTime ? (new Date(leg.startTime).getTime() - startTime.getTime()) / (itinerary.duration * 1000) * 100 : 0)}%`,
+                        left: '0%',
                         width: `${widthPercent}%`
                       }}
                     />
@@ -252,10 +248,6 @@ export function RouteCard({
         {/* Mode chips */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3">
           {transitLegs.map((leg, index) => {
-            const IconComponent = (LucideIcons as any)[
-              getModeIcon(leg.mode).charAt(0).toUpperCase() + 
-              getModeIcon(leg.mode).slice(1)
-            ] || LucideIcons.Circle;
             
             // Display priority: vehicleName > lineName > mode
             const displayName = leg.mode === 'WALK'
@@ -270,7 +262,8 @@ export function RouteCard({
                   getModeColor(leg.mode)
                 )}
               >
-                <IconComponent className="h-2.5 w-2.5 sm:h-3 sm:w-3" aria-hidden="true" />
+                {/* <IconComponent className="h-2.5 w-2.5 sm:h-3 sm:w-3" aria-hidden="true" /> */}
+                <img src={`${jeepneyIcon}`} alt={leg.mode} className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 <span className="truncate max-w-[120px] sm:max-w-none">{displayName}</span>
               </div>
             );

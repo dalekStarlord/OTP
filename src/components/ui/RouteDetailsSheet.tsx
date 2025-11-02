@@ -18,7 +18,7 @@ interface RouteDetailsSheetProps {
 
 export default function RouteDetailsSheet({ itinerary, fareType }: RouteDetailsSheetProps) {
   const { t, i18n } = useTranslation();
-  const { viewingLegIndex, setViewingLegIndex, focusedLegIndex, setFocusedLegIndex, setSelectedItineraryId } = usePlanStore();
+  const { viewingLegIndex, setViewingLegIndex, setFocusedLegIndex, setSelectedItineraryId } = usePlanStore();
 
   const totalFare = calculateTotalFare(itinerary, fareType);
 

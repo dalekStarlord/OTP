@@ -38,7 +38,7 @@ interface AppStore {
   status: AppStatus;
   setStatus: (status: Partial<AppStatus>) => void;
   setError: (
-    type: AppStatus['error']['type'],
+    type: 'network' | 'geocode' | 'route' | 'location' | 'unknown',
     message: string,
     recoverable?: boolean
   ) => void;

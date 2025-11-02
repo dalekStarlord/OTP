@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
 import { Star, Trash2, MapPin, Route, Home, Briefcase, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from '../components/ui/Button';
 import type { SavedPlace } from '../lib/enhanced-types';
 
 export function Favorites() {

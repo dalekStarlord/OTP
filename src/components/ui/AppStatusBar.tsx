@@ -8,7 +8,6 @@ import { useAppStore } from '../../store/appStore';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import {
-  Wifi,
   WifiOff,
   Loader2,
   MapPin,
@@ -35,7 +34,7 @@ export function AppStatusBar() {
 
     // Small delay to avoid flicker on quick operations
     const timer = setTimeout(() => {
-      setShow(shouldShow);
+      setShow(!!shouldShow);
     }, STATUS_UPDATE_INTERVAL);
 
     return () => clearTimeout(timer);

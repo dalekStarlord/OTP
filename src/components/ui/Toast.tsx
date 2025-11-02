@@ -3,7 +3,6 @@
  * Provides immediate feedback for user actions
  */
 
-import { useEffect } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, AlertCircle, Info, X } from 'lucide-react';
@@ -85,7 +84,7 @@ function Toast({ toast, onClose, reducedMotion }: ToastProps) {
         {toast.action && (
           <button
             onClick={() => {
-              toast.action.onClick();
+              toast.action?.onClick();
               onClose();
             }}
             className="mt-2 text-sm underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent rounded"

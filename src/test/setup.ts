@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { expect, afterEach, vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
 // Cleanup after each test
@@ -23,7 +23,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
+(window as any).IntersectionObserver = class IntersectionObserver {
   constructor() {}
   disconnect() {}
   observe() {}
@@ -40,7 +40,7 @@ const mockGeolocation = {
   clearWatch: vi.fn(),
 };
 
-Object.defineProperty(global.navigator, 'geolocation', {
+Object.defineProperty(window.navigator, 'geolocation', {
   value: mockGeolocation,
   writable: true,
 });

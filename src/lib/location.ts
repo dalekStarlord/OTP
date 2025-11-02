@@ -38,13 +38,14 @@ export function startLocationWatch(
   options: LocationWatchOptions = {}
 ): number | null {
   if (!isGeolocationSupported()) {
-    callbacks.onError({
-      code: 0, // PERMISSION_DENIED
+    const mockError: GeolocationPositionError = {
+      code: 1, // PERMISSION_DENIED
       message: 'Geolocation is not supported by this browser',
-      PERMISSION_DENIED: 0,
-      POSITION_UNAVAILABLE: 1,
-      TIMEOUT: 2,
-    } as GeolocationPositionError);
+      PERMISSION_DENIED: 1,
+      POSITION_UNAVAILABLE: 2,
+      TIMEOUT: 3,
+    };
+    callbacks.onError(mockError);
     return null;
   }
 

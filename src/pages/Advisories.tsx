@@ -7,9 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { getServiceAdvisories } from '../lib/api';
 import { useAppStore } from '../store/appStore';
 import type { ServiceAdvisory } from '../lib/enhanced-types';
-import { AlertCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { AlertTriangle, Info, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { formatDistance } from '../lib/utils';
 
 export function Advisories() {
   const { t } = useTranslation();

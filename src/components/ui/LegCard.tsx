@@ -2,10 +2,11 @@
  * LegCard component - Compact clickable card for each route leg
  */
 
-import { ChevronRight, CircleDot } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn, formatDuration, formatFare, getModeIcon, getModeColor, getDisplayFare } from '../../lib/utils';
 import type { NormalizedLeg, FareType } from '../../lib/types';
 import * as LucideIcons from 'lucide-react';
+import jeepneyIcon from '../../assets/jeepney-icon.svg';
 
 interface LegCardProps {
   leg: NormalizedLeg;
@@ -14,7 +15,7 @@ interface LegCardProps {
   onClick: () => void;
 }
 
-export function LegCard({ leg, legIndex, fareType, onClick }: LegCardProps) {
+export function LegCard({ leg, fareType, onClick }: LegCardProps) {
   const IconComponent = (LucideIcons as any)[
     getModeIcon(leg.mode).charAt(0).toUpperCase() + getModeIcon(leg.mode).slice(1)
   ] || LucideIcons.Circle;
@@ -46,7 +47,10 @@ export function LegCard({ leg, legIndex, fareType, onClick }: LegCardProps) {
         'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
         getModeColor(leg.mode)
       )}>
-        <IconComponent className="h-5 w-5" aria-hidden="true" />
+        
+        {leg.mode === 'JEEPNEY' && <img src={`${jeepneyIcon}`} alt={leg.mode} className="h-6 w-6" aria-hidden="true" />}
+        {leg.mode === 'WALK' && <IconComponent className="h-6 w-6" aria-hidden="true" />}
+        
       </div>
 
       {/* Route Name and Duration */}

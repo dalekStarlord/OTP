@@ -207,9 +207,9 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
                   onClick={handleSwap}
                   disabled={!from && !to}
                   aria-label={t('search.swap')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-blue-600 text-white shadow-md flex items-center justify-center disabled:opacity-50 hover:bg-blue-700 transition-colors z-10 pointer-events-auto"
+                  className="absolute right-2 top-[50%] -translate-y-[31%] h-10 w-10 rounded-full bg-blue-600 text-white shadow-md flex items-center justify-center disabled:opacity-50 hover:bg-blue-700 transition-colors z-10 pointer-events-auto"
                 >
-                  <ArrowLeftRight className="h-3.5 w-3.5" />
+                  <ArrowLeftRight className="h-5 w-5" />
                 </button>
                 <EnhancedSearchBar
                   type="to"
@@ -218,7 +218,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
                 />
               </div>
 
-              {/* Clear button */}
+              {/* Clear button
               <div className="flex justify-center">
                 <button
                   onClick={handleClear}
@@ -241,7 +241,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
                     />
                   </svg>
                 </button>
-              </div>
+              </div> */}
 
               {/* Filters toggle */}
               <button
