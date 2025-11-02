@@ -10,7 +10,6 @@ import i18n from './i18n/config';
 import { AppStatusBar } from './components/ui/AppStatusBar';
 import { ToastContainer } from './components/ui/Toast';
 import { SkipLink } from './components/ui/SkipLink';
-import { HelpDialog } from './components/ui/HelpDialog';
 import { LocationTracker } from './components/LocationTracker';
 import { Home } from './pages/Home';
 import { LiveTracker } from './pages/LiveTracker';
@@ -61,9 +60,6 @@ function AppContent() {
 
       {/* Toast notifications */}
       <ToastContainer />
-
-      {/* Help dialog */}
-      <HelpDialog />
 
       {/* Location tracking - Always active */}
       <LocationTracker />

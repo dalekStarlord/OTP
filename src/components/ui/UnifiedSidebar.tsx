@@ -35,7 +35,6 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
     itineraries, 
     selectedItineraryId, 
     setSelectedItineraryId, 
-    clear,
     setItineraries
   } = usePlanStore();
   const { filters, setFilters, preferences, setPreferences, addToast, addRecentSearch } = useAppStore();
@@ -64,10 +63,6 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
     const temp = from;
     setFrom(to);
     setTo(temp);
-  };
-
-  const handleClear = () => {
-    clear();
   };
 
   // Sort itineraries based on filter

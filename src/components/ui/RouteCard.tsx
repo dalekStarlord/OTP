@@ -5,10 +5,9 @@
 
 import { useTranslation } from 'react-i18next';
 import { Clock, ArrowRightLeft } from 'lucide-react';
-import { cn, formatDuration, formatFare, getModeColor, getModeIcon, calculateTotalFare, calculateFareSavings } from '../../lib/utils';
+import { cn, formatDuration, formatFare, getModeColor, calculateTotalFare, calculateFareSavings } from '../../lib/utils';
 import type { NormalizedItinerary, FareType } from '../../lib/types';
 import { motion } from 'framer-motion';
-import * as LucideIcons from 'lucide-react';
 import { getRouteColor } from '../../lib/polyline';
 import jeepneyIcon from '../../assets/jeepney-icon.svg';
 
