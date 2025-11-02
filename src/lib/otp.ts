@@ -9,6 +9,7 @@ export const gtfsClient = new GraphQLClient(GTFS_URL, {
     'content-type': 'application/json',
     'ngrok-skip-browser-warning': 'true'
   },
+  credentials: 'omit',  // Avoid mobile network/proxy issues
 });
 
 // ===== GTFS V1 =====
