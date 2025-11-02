@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import type { Coord, NormalizedItinerary, NormalizedLeg } from './types';
 
-const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://e6833c24d422.ngrok-free.app';
+const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://6b2e5e17e8fe.ngrok-free.app';
 const GTFS_URL = import.meta.env.VITE_OTP_GTFS_GQL || `${OTP_BASE}/otp/gtfs/v1`;
 
 export const gtfsClient = new GraphQLClient(GTFS_URL, {
