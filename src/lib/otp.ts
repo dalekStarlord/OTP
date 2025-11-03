@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import type { Coord, NormalizedItinerary, NormalizedLeg } from './types';
 
-const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://12104a682401.ngrok-free.app';
+const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://e8f47a74a2af.ngrok-free.app';
 const GTFS_URL = import.meta.env.VITE_OTP_GTFS_GQL || `${OTP_BASE}/otp/gtfs/v1`;
 
 export const gtfsClient = new GraphQLClient(GTFS_URL, {
@@ -9,7 +9,6 @@ export const gtfsClient = new GraphQLClient(GTFS_URL, {
     'content-type': 'application/json',
     'ngrok-skip-browser-warning': 'true'
   },
-  credentials: 'omit',  // Avoid mobile network/proxy issues
 });
 
 // ===== GTFS V1 =====
