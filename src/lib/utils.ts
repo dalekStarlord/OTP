@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import type { NormalizedLeg, NormalizedItinerary, FareType, Coord } from './types';
 import { reverseGeocode } from './api';
+import { logger } from './logger';
 
 /**
  * Merge Tailwind CSS classes with clsx
@@ -150,7 +151,7 @@ export function saveToStorage<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
-    console.error(`Failed to save ${key} to localStorage`, error);
+    logger.error(`Failed to save ${key} to localStorage`, error);
   }
 }
 
@@ -162,7 +163,7 @@ export function loadFromStorage<T>(key: string): T | null {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : null;
   } catch (error) {
-    console.error(`Failed to load ${key} from localStorage`, error);
+    logger.error(`Failed to load ${key} from localStorage`, error);
     return null;
   }
 }
@@ -252,7 +253,7 @@ export async function formatStopName(
       // Final fallback
       return 'Unknown location';
     } catch (error) {
-      console.warn('Failed to format stop name:', error);
+      logger.warn('Failed to format stop name', { error });
       
       // Return cleaned raw name or fallback
       if (rawName && rawName.length > 0) {

@@ -30,17 +30,55 @@ export function isGeolocationSupported(): boolean {
 }
 
 /**
+ * Check geolocation permission status
+ * Returns 'granted', 'denied', or 'prompt'
+ */
+export async function checkGeolocationPermission(): Promise<'granted' | 'denied' | 'prompt'> {
+  if (!isGeolocationSupported()) {
+    return 'denied';
+  }
+
+  // Check if Permissions API is available
+  if (!('permissions' in navigator)) {
+    // Permissions API not available, return 'prompt' to allow browser to handle
+    return 'prompt';
+  }
+
+  try {
+    const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+    return result.state as 'granted' | 'denied' | 'prompt';
+  } catch (error) {
+    // Permissions API failed, fall back to prompt
+    return 'prompt';
+  }
+}
+
+/**
  * Start watching user's position with real-time updates
  * Returns a watch ID that can be used to stop tracking
  */
-export function startLocationWatch(
+export async function startLocationWatch(
   callbacks: LocationWatchCallbacks,
   options: LocationWatchOptions = {}
-): number | null {
+): Promise<number | null> {
   if (!isGeolocationSupported()) {
     const mockError: GeolocationPositionError = {
       code: 1, // PERMISSION_DENIED
       message: 'Geolocation is not supported by this browser',
+      PERMISSION_DENIED: 1,
+      POSITION_UNAVAILABLE: 2,
+      TIMEOUT: 3,
+    };
+    callbacks.onError(mockError);
+    return null;
+  }
+
+  // Check permission before requesting
+  const permission = await checkGeolocationPermission();
+  if (permission === 'denied') {
+    const mockError: GeolocationPositionError = {
+      code: 1, // PERMISSION_DENIED
+      message: 'Location access denied. Please enable location permissions in your browser settings.',
       PERMISSION_DENIED: 1,
       POSITION_UNAVAILABLE: 2,
       TIMEOUT: 3,

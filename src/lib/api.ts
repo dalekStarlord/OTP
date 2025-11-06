@@ -6,6 +6,9 @@
 import { geocodeSearch } from './geocode';
 import type { GeocodeResult, LiveVehicle, ServiceAdvisory, ContributionReport } from './enhanced-types';
 import type { Coord } from './types';
+import { validateCoordinate } from './validation';
+import { logger } from './logger';
+import { fetchWithTimeout } from './api-utils';
 
 /**
  * Geocode search using Nominatim OSM
@@ -33,17 +36,27 @@ export async function geocode(query: string): Promise<GeocodeResult[]> {
  * Using Photon API for CORS-friendly requests
  */
 export async function reverseGeocode(coord: Coord): Promise<GeocodeResult | null> {
+  // Validate coordinates
+  if (!validateCoordinate(coord.lat, coord.lon)) {
+    logger.warn('Invalid coordinates for reverse geocode', { coord });
+    return null;
+  }
+
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://photon.komoot.io/reverse?lat=${coord.lat}&lon=${coord.lon}`,
       {
         headers: {
           'Accept': 'application/json',
         },
-      }
+      },
+      10000 // 10 second timeout
     );
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      logger.warn('Reverse geocode API failed', { status: response.status });
+      return null;
+    }
 
     const data = await response.json();
     const feature = data.features?.[0];
@@ -63,7 +76,7 @@ export async function reverseGeocode(coord: Coord): Promise<GeocodeResult | null
       landmark: extractLandmark(displayName),
     };
   } catch (error) {
-    console.error('Reverse geocode error:', error);
+    logger.error('Reverse geocode error', error);
     return null;
   }
 }
@@ -89,7 +102,7 @@ function formatDisplayName(props: any): string {
 export async function getLiveVehicles(): Promise<LiveVehicle[]> {
   // TODO: Implement real GTFS-RT integration
   // For now, return empty array
-  console.warn('Live vehicle tracking not yet implemented - needs GTFS-RT feed');
+  logger.warn('Live vehicle tracking not yet implemented - needs GTFS-RT feed');
   return [];
 }
 
@@ -103,7 +116,7 @@ export async function getServiceAdvisories(): Promise<ServiceAdvisory[]> {
   // - A custom backend API
   // - RSS feed from city/transit authority
   // - Social media integration
-  console.warn('Service advisories not yet implemented - needs advisory data source');
+  logger.warn('Service advisories not yet implemented - needs advisory data source');
   return [];
 }
 
@@ -120,7 +133,7 @@ export async function submitContribution(
   // - Sends notifications to administrators
   // - Allows status tracking
   
-  console.warn('Contribution submission not yet implemented - needs backend API');
+  logger.warn('Contribution submission not yet implemented - needs backend API');
   
   // For now, simulate success
   const submitted: ContributionReport = {

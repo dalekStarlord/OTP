@@ -19,6 +19,7 @@ import { ArrowLeftRight, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import MapView from '../components/MapView';
+import { logger } from '../lib/logger';
 
 export function Home() {
   const { t } = useTranslation();
@@ -37,7 +38,7 @@ export function Home() {
         await checkRouteTrips();
         await checkServiceDates();
       } catch (error) {
-        console.error('Diagnostics failed:', error);
+        logger.error('Diagnostics failed', error);
       }
     };
     runDiagnostics();
@@ -85,12 +86,12 @@ export function Home() {
       );
       
       if (results.length === 0) {
-        console.warn('⚠️ No itineraries returned from API!');
-        console.warn('🧪 Running diagnostic test with relaxed constraints...');
+        logger.warn('No itineraries returned from API');
+        logger.warn('Running diagnostic test with relaxed constraints');
         try {
           await testSimpleRoute(from, to);
         } catch (err) {
-          console.error('Diagnostic test also failed:', err);
+          logger.error('Diagnostic test also failed', err);
         }
       }
 
@@ -107,7 +108,7 @@ export function Home() {
         message: t('plan.foundRoutes', { count: results.length }),
       });
     } catch (error) {
-      console.error('Route planning error:', error);
+      logger.error('Route planning error', error);
       addToast({
         type: 'error',
         message: t('errors.routeFailed'),

@@ -79,7 +79,7 @@ export default defineConfig({
   },
   build: {
     target: 'es2015',
-    sourcemap: true,
+    sourcemap: false, // Disable source maps in production for security
     rollupOptions: {
       output: {
         manualChunks: {

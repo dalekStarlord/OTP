@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { SORT_OPTIONS } from '../../lib/constants';
 import { Sun, Moon, Languages, Type } from 'lucide-react';
+import { logger } from '../../lib/logger';
 
 interface UnifiedSidebarProps {
   pickingMode: 'from' | 'to' | null;
@@ -106,7 +107,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
       );
 
       if (results.length === 0) {
-        console.warn('⚠️ No itineraries returned from API!');
+        logger.warn('No itineraries returned from API');
       }
 
       // Store results as-is, sorting will be handled by useMemo
@@ -120,7 +121,7 @@ export function UnifiedSidebar({ pickingMode, hoveredItineraryId: _hoveredItiner
         message: `Found ${results.length} routes`,
       });
     } catch (error) {
-      console.error('Route planning error:', error);
+      logger.error('Route planning error', error);
       addToast({
         type: 'error',
         message: t('errors.routeFailed'),

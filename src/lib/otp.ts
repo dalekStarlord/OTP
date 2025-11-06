@@ -1,10 +1,11 @@
 import { GraphQLClient } from 'graphql-request';
 import type { Coord, NormalizedItinerary, NormalizedLeg } from './types';
+import { API_CONFIG } from './config';
+import { validateCoord, validateNumItineraries } from './validation';
+import { logger } from './logger';
+import { apiRateLimiter } from './rateLimiter';
 
-const OTP_BASE = import.meta.env.VITE_OTP_BASE || 'https://314ccf62ac45.ngrok-free.app';
-const GTFS_URL = import.meta.env.VITE_OTP_GTFS_GQL || `${OTP_BASE}/otp/gtfs/v1`;
-
-export const gtfsClient = new GraphQLClient(GTFS_URL, {
+export const gtfsClient = new GraphQLClient(API_CONFIG.gtfsUrl, {
   headers: { 
     'content-type': 'application/json',
     'ngrok-skip-browser-warning': 'true'
@@ -78,27 +79,45 @@ export async function planTripGtfs(
   _dateTime: string, // Not used by this OTP GTFS endpoint
   numItineraries: number = 5
 ): Promise<NormalizedItinerary[]> {
+  // Validate inputs
+  if (!validateCoord(from)) {
+    throw new Error('Invalid origin coordinates');
+  }
+  if (!validateCoord(to)) {
+    throw new Error('Invalid destination coordinates');
+  }
+  const validNumItineraries = validateNumItineraries(numItineraries);
+
+  // Check rate limit
+  if (!apiRateLimiter.canMakeRequest()) {
+    const timeUntilReset = Math.ceil(apiRateLimiter.getTimeUntilReset() / 1000);
+    throw new Error(`Too many requests. Please wait ${timeUntilReset} seconds before trying again.`);
+  }
+
   // Simplified query for OTP 2.x - let it use defaults
   const variables: GtfsVars = {
     fromLat: from.lat,
     fromLon: from.lon,
     toLat: to.lat,
     toLon: to.lon,
-    numItineraries,
+    numItineraries: validNumItineraries,
   };
 
   try {
     const data: any = await gtfsClient.request(GTFS_PLAN_QUERY, variables);
     return normalizeGtfs(data);
   } catch (error) {
-    console.error('❌ GTFS trip planning error:', error);
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack
-      });
-    }
-    throw error;
+    logger.error('GTFS trip planning error', error, {
+      from: { lat: from.lat, lon: from.lon },
+      to: { lat: to.lat, lon: to.lon },
+    });
+    
+    // Throw user-friendly error message
+    const userMessage = error instanceof Error && error.message.includes('timeout')
+      ? 'Request timeout. Please try again.'
+      : 'Failed to plan trip. Please try again.';
+    
+    throw new Error(userMessage);
   }
 }
 
@@ -258,8 +277,8 @@ export async function checkAvailableRoutes(): Promise<void> {
     const data: any = await gtfsClient.request(ROUTES_QUERY);
     return data;
   } catch (error) {
-    console.error('❌ Failed to fetch routes:', error);
-    throw error;
+    logger.error('Failed to fetch routes', error);
+    throw new Error('Failed to fetch routes');
   }
 }
 
@@ -280,8 +299,8 @@ export async function checkAvailableStops(): Promise<void> {
     const data: any = await gtfsClient.request(STOPS_QUERY);
     return data;
   } catch (error) {
-    console.error('❌ Failed to fetch stops:', error);
-    throw error;
+    logger.error('Failed to fetch stops', error);
+    throw new Error('Failed to fetch stops');
   }
 }
 
@@ -308,8 +327,8 @@ export async function checkPlanSchema(): Promise<void> {
     const data: any = await gtfsClient.request(SCHEMA_QUERY);
     return data;
   } catch (error) {
-    console.error('❌ Failed to check schema:', error);
-    throw error;
+    logger.error('Failed to check schema', error);
+    throw new Error('Failed to check schema');
   }
 }
 
@@ -334,10 +353,10 @@ export async function checkServiceDates(): Promise<void> {
     const data: any = await gtfsClient.request(SERVICE_QUERY);
     // Limit results in JavaScript instead of GraphQL
     const limitedRoutes = data?.routes?.slice(0, 1) || [];
-    console.log('✅ Service dates check completed:', limitedRoutes.length, 'route(s) found');
+    logger.info('Service dates check completed', { routesFound: limitedRoutes.length });
   } catch (error) {
-    console.error('❌ Failed to check service dates:', error);
-    throw error;
+    logger.error('Failed to check service dates', error);
+    throw new Error('Failed to check service dates');
   }
 }
 
@@ -362,13 +381,13 @@ export async function checkRouteTrips(): Promise<void> {
     const routesWithTrips = data?.routes?.filter((r: any) => r.trips && r.trips.length > 0) || [];
     
     if (routesWithTrips.length === 0) {
-      console.error('❌ CRITICAL: No routes have trips scheduled! GTFS data is incomplete.');
+      logger.error('CRITICAL: No routes have trips scheduled! GTFS data is incomplete.');
     }
     
     return data;
   } catch (error) {
-    console.error('❌ Failed to check trips:', error);
-    throw error;
+    logger.error('Failed to check trips', error);
+    throw new Error('Failed to check trips');
   }
 }
 
@@ -376,6 +395,14 @@ export async function checkRouteTrips(): Promise<void> {
  * Test a simple route with minimal constraints
  */
 export async function testSimpleRoute(from: Coord, to: Coord): Promise<void> {
+  // Validate inputs
+  if (!validateCoord(from)) {
+    throw new Error('Invalid origin coordinates');
+  }
+  if (!validateCoord(to)) {
+    throw new Error('Invalid destination coordinates');
+  }
+
   const SIMPLE_QUERY = `
     query TestPlan($fromLat: Float!, $fromLon: Float!, $toLat: Float!, $toLon: Float!) {
       plan(
@@ -407,8 +434,8 @@ export async function testSimpleRoute(from: Coord, to: Coord): Promise<void> {
     const data: any = await gtfsClient.request(SIMPLE_QUERY, variables);
     return data;
   } catch (error) {
-    console.error('❌ Simple route test failed:', error);
-    throw error;
+    logger.error('Simple route test failed', error);
+    throw new Error('Simple route test failed');
   }
 }
 

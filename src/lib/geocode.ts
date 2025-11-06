@@ -1,4 +1,8 @@
 import type { Coord } from './types';
+import { sanitizeSearchQuery, validateCoordinate, validateGeocodeSuggestion } from './validation';
+import { logger } from './logger';
+import { geocodeRateLimiter } from './rateLimiter';
+import { fetchWithTimeout } from './api-utils';
 
 export type GeocodeSuggestion = {
   name: string;
@@ -12,49 +16,74 @@ export async function geocodeSearch(
   query: string,
   signal?: AbortSignal
 ): Promise<GeocodeSuggestion[]> {
-  if (!query || query.trim().length < 3) return [];
+  // Sanitize and validate query
+  const sanitizedQuery = sanitizeSearchQuery(query);
+  if (!sanitizedQuery || sanitizedQuery.length < 3) return [];
+
+  // Check rate limit
+  if (!geocodeRateLimiter.canMakeRequest()) {
+    logger.warn('Geocoding rate limit exceeded', { query: sanitizedQuery });
+    return [];
+  }
 
   try {
     // Use Photon API - CORS-friendly alternative to Nominatim
     // Focus on Cagayan de Oro area
     const params = new URLSearchParams({
-      q: query,
+      q: sanitizedQuery,
       limit: '5',
       lat: '8.48',  // CDO center
       lon: '124.63',
       bbox: '124.5,8.3,124.8,8.6', // CDO bounding box
     });
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://photon.komoot.io/api/?${params}`,
       {
         signal,
         headers: {
           'Accept': 'application/json',
         },
-      }
+      },
+      10000 // 10 second timeout
     );
 
     if (!response.ok) {
-      console.warn('Photon API failed, falling back to local search');
-      return getFallbackResults(query);
+      logger.warn('Photon API failed, falling back to local search', { status: response.status });
+      return getFallbackResults(sanitizedQuery);
     }
 
     const data = await response.json();
 
-    return data.features.map((item: any) => ({
-      name: item.properties.name || item.properties.street || 'Unknown location',
-      displayName: formatDisplayName(item.properties),
-      lat: item.geometry.coordinates[1],
-      lon: item.geometry.coordinates[0],
-    }));
+    // Validate and filter results
+    const results = data.features
+      .map((item: any) => {
+        const lat = item.geometry.coordinates[1];
+        const lon = item.geometry.coordinates[0];
+        
+        // Validate coordinates
+        if (!validateCoordinate(lat, lon)) {
+          return null;
+        }
+        
+        return {
+          name: item.properties.name || item.properties.street || 'Unknown location',
+          displayName: formatDisplayName(item.properties),
+          lat,
+          lon,
+        };
+      })
+      .filter((item: GeocodeSuggestion | null): item is GeocodeSuggestion => item !== null);
+
+    // Validate all results
+    return results.filter(validateGeocodeSuggestion);
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       // Ignore abort errors
       return [];
     }
-    console.warn('Geocoding error, using fallback:', error);
-    return getFallbackResults(query);
+    logger.warn('Geocoding error, using fallback', { error });
+    return getFallbackResults(sanitizedQuery);
   }
 }
 
@@ -115,13 +144,51 @@ const MAX_CACHE_SIZE = 5;
 export function getCachedSelections(): GeocodeSuggestion[] {
   try {
     const cached = localStorage.getItem(CACHE_KEY);
-    return cached ? JSON.parse(cached) : [];
-  } catch {
+    if (!cached) return [];
+    
+    const parsed = JSON.parse(cached);
+    
+    // Validate structure
+    if (!Array.isArray(parsed)) {
+      // Clear corrupted cache
+      localStorage.removeItem(CACHE_KEY);
+      return [];
+    }
+    
+    // Validate and filter items
+    const validItems = parsed
+      .filter((item: any) => validateGeocodeSuggestion(item))
+      .slice(0, MAX_CACHE_SIZE);
+    
+    // If cache was corrupted, update it
+    if (validItems.length < parsed.length) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(validItems));
+      } catch (error) {
+        logger.warn('Failed to update corrupted cache', { error });
+      }
+    }
+    
+    return validItems;
+  } catch (error) {
+    // If cache is corrupted, clear it
+    logger.warn('Failed to read cache, clearing', { error });
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch {
+      // Ignore errors when clearing
+    }
     return [];
   }
 }
 
 export function cacheSelection(selection: GeocodeSuggestion): void {
+  // Validate selection before caching
+  if (!validateGeocodeSuggestion(selection)) {
+    logger.warn('Invalid selection, not caching', { selection });
+    return;
+  }
+  
   try {
     const cached = getCachedSelections();
     const filtered = cached.filter(
@@ -130,7 +197,7 @@ export function cacheSelection(selection: GeocodeSuggestion): void {
     const updated = [selection, ...filtered].slice(0, MAX_CACHE_SIZE);
     localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
   } catch (error) {
-    console.error('Failed to cache selection:', error);
+    logger.error('Failed to cache selection', error);
   }
 }
 

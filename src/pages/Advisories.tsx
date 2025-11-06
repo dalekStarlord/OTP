@@ -9,6 +9,7 @@ import { useAppStore } from '../store/appStore';
 import type { ServiceAdvisory } from '../lib/enhanced-types';
 import { AlertTriangle, Info, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { logger } from '../lib/logger';
 
 export function Advisories() {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ export function Advisories() {
         const data = await getServiceAdvisories();
         setAdvisories(data);
       } catch (error) {
-        console.error('Error fetching advisories:', error);
+        logger.error('Error fetching advisories', error);
       } finally {
         setStatus({ fetching: false });
       }

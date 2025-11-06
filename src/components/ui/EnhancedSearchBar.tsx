@@ -14,6 +14,7 @@ import type { GeocodeResult } from '../../lib/enhanced-types';
 import type { Coord } from '../../lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from '../../lib/utils';
+import { logger } from '../../lib/logger';
 
 interface EnhancedSearchBarProps {
   type: 'from' | 'to';
@@ -55,7 +56,7 @@ export function EnhancedSearchBar({
         const searchResults = await geocode(searchQuery);
         setResults(searchResults);
       } catch (error) {
-        console.error('Geocode error:', error);
+        logger.error('Geocode error', error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -85,7 +86,7 @@ export function EnhancedSearchBar({
   // Handle geolocation
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
-      console.error('Geolocation is not supported by this browser');
+      logger.error('Geolocation is not supported by this browser');
       addToast({
         type: 'error',
         message: t('locationErrors.geolocationNotSupported'),
@@ -108,7 +109,7 @@ export function EnhancedSearchBar({
         setStatus({ gpsLock: false });
       },
       (error) => {
-        console.error('Geolocation error:', error);
+        logger.error('Geolocation error', error);
         setStatus({ gpsLock: false });
         
         let errorMessage = t('locationErrors.unableToGetLocation');

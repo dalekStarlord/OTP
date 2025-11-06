@@ -1,5 +1,6 @@
 import polyline from '@mapbox/polyline';
 import type { LatLngTuple } from 'leaflet';
+import { logger } from './logger';
 
 /**
  * Decode an encoded polyline string to lat/lng coordinates
@@ -29,9 +30,10 @@ export function decodePolyline(encoded?: string | null): LatLngTuple[] {
       );
       
       if (!isValid6) {
-        console.error('❌ Both precision 5 and 6 produced invalid coordinates');
-        console.error('Sample coordinate:', decoded.length > 0 ? decoded[0] : null);
-        console.error('Encoded string (first 100 chars):', encoded.substring(0, 100));
+        logger.error('Both precision 5 and 6 produced invalid coordinates', undefined, {
+          sampleCoordinate: decoded.length > 0 ? decoded[0] : null,
+          encodedPreview: encoded.substring(0, 100),
+        });
         return [];
       }
     }
@@ -41,8 +43,9 @@ export function decodePolyline(encoded?: string | null): LatLngTuple[] {
     
     return cleaned;
   } catch (error) {
-    console.error('Failed to decode polyline:', error);
-    console.error('Encoded string (first 100 chars):', encoded?.substring(0, 100));
+    logger.error('Failed to decode polyline', error, {
+      encodedPreview: encoded?.substring(0, 100),
+    });
     return [];
   }
 }

@@ -14,6 +14,7 @@ import { getRelativeTime } from '../lib/utils';
 import { Bus, Navigation, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import 'leaflet/dist/leaflet.css';
+import { logger } from '../lib/logger';
 
 export function LiveTracker() {
   const { t, i18n } = useTranslation();
@@ -29,7 +30,7 @@ export function LiveTracker() {
         const data = await getLiveVehicles();
         setVehicles(data);
       } catch (error) {
-        console.error('Error fetching live vehicles:', error);
+        logger.error('Error fetching live vehicles', error);
       } finally {
         setStatus({ fetching: false });
       }

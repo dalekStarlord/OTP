@@ -1,5 +1,6 @@
 import { usePlanStore } from '../store/planStore';
 import { planTripGtfs, dedupeAndSort } from '../lib/otp';
+import { logger } from '../lib/logger';
 
 export default function Controls() {
   const {
@@ -43,7 +44,7 @@ export default function Controls() {
         // setSelectedItineraryId(deduped[0]?.id);
       }
     } catch (error) {
-      console.error('❌ GTFS Planning error:', error);
+      logger.error('GTFS Planning error', error);
       setError(error instanceof Error ? error.message : 'Failed to plan trip. Please try again.');
     } finally {
       setLoading(false);

@@ -12,6 +12,7 @@ import {
   getLocationErrorMessage,
   getLocationInstructions,
 } from '../lib/location';
+import { logger } from '../lib/logger';
 
 export function LocationTracker() {
   const {
@@ -41,7 +42,7 @@ export function LocationTracker() {
     }
 
     // Start tracking
-    const watchId = startLocationWatch(
+    const watchIdPromise = startLocationWatch(
       {
         onSuccess: (position) => {
           const now = Date.now();
@@ -64,7 +65,7 @@ export function LocationTracker() {
           setStatus({ gpsLock: false });
         },
         onError: (error) => {
-          console.error('Location tracking error:', error);
+          logger.error('Location tracking error', error);
           
           // Stop tracking on error
           setIsTrackingLocation(false);
@@ -93,19 +94,21 @@ export function LocationTracker() {
       }
     );
 
-    if (watchId !== null) {
-      watchIdRef.current = watchId;
-      setLocationWatchId(watchId);
-      setStatus({ gpsLock: true });
-    } else {
-      // Failed to start tracking
-      setIsTrackingLocation(false);
-      addToast({
-        type: 'error',
-        message: 'Failed to start location tracking. Geolocation may not be supported.',
-        duration: 5000,
-      });
-    }
+    watchIdPromise.then((watchId) => {
+      if (watchId !== null) {
+        watchIdRef.current = watchId;
+        setLocationWatchId(watchId);
+        setStatus({ gpsLock: true });
+      } else {
+        // Failed to start tracking
+        setIsTrackingLocation(false);
+        addToast({
+          type: 'error',
+          message: 'Failed to start location tracking. Geolocation may not be supported.',
+          duration: 5000,
+        });
+      }
+    });
 
     // Cleanup on unmount or when tracking stops
     return () => {
